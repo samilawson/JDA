@@ -454,7 +454,7 @@ public class SimpleLog
         WARNING("Warning", 4, true),
         FATAL("Fatal", 5, true),
         OFF("NO-LOGGING", 6, true),
-        TEST("Test", 7, false);
+        TEST("Testing", 7, false);
 
         private String msg;
         private int pri;
