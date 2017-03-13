@@ -378,6 +378,11 @@ public class SimpleLog
         log(Level.FATAL, msg);
     }
 
+    public void test(Object msg)
+    {
+        log(Level.TEST, msg);
+    }
+
     /**
      * prints a message to the console or as message-box.
      *
@@ -448,7 +453,8 @@ public class SimpleLog
         INFO("Info", 3, false),
         WARNING("Warning", 4, true),
         FATAL("Fatal", 5, true),
-        OFF("NO-LOGGING", 6, true);
+        OFF("NO-LOGGING", 6, true),
+        TEST("Test", 7, false);
 
         private String msg;
         private int pri;

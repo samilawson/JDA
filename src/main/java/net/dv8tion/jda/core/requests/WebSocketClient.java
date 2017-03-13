@@ -106,6 +106,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
 
     public void ready()
     {
+        LOG.test("WS.ready() called with " + api.getGuilds().size() + " Guilds. <" + (initiating ? (firstInit ? "READY" : "RECONNECT") : "RESUMED") + ">");
         if (initiating)
         {
             initiating = false;
@@ -455,27 +456,27 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                 handleEvent(content);
                 break;
             case 1:
-                LOG.debug("Got Keep-Alive request (OP 1). Sending response...");
+                LOG.test("Got Keep-Alive request (OP 1). Sending response...");
                 sendKeepAlive();
                 break;
             case 7:
-                LOG.debug("Got Reconnect request (OP 7). Closing connection now...");
+                LOG.test("Got Reconnect request (OP 7). Closing connection now...");
                 close();
                 break;
             case 9:
-                LOG.debug("Got Invalidate request (OP 9). Invalidating...");
+                LOG.test("Got Invalidate request (OP 9). Invalidating...");
                 invalidate();
                 sendIdentify();
                 break;
             case 10:
-                LOG.debug("Got HELLO packet (OP 10). Initializing keep-alive.");
+                LOG.test("Got HELLO packet (OP 10). Initializing keep-alive.");
                 setupKeepAlive(content.getJSONObject("d").getLong("heartbeat_interval"));
                 break;
             case 11:
-                LOG.trace("Got Heartbeat Ack (OP 11).");
+                LOG.test("Got Heartbeat Ack (OP 11).");
                 break;
             default:
-                LOG.debug("Got unknown op-code: " + opCode + " with content: " + message);
+                LOG.test("Got unknown op-code: " + opCode + " with content: " + message);
         }
     }
 
@@ -514,13 +515,18 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                 ).toString();
 
         if (!send(keepAlivePacket, true))
+        {
+            LOG.test("Failed to send heartbeat due to WS ratelimit!");
             ratelimitQueue.addLast(keepAlivePacket);
+        }
+        else
+            LOG.test("Sent Heartbeat (OP 1).");
 
     }
 
     protected void sendIdentify()
     {
-        LOG.debug("Sending Identify-packet...");
+        LOG.test("Sending Identify-packet...");
         PresenceImpl presenceObj = (PresenceImpl) api.getPresence();
         JSONObject identify = new JSONObject()
                 .put("op", 2)
@@ -549,7 +555,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
 
     protected void sendResume()
     {
-        LOG.debug("Sending Resume-packet...");
+        LOG.test("Sending Resume-packet...");
         JSONObject resume = new JSONObject()
                 .put("op", 6)
                 .put("d", new JSONObject()
@@ -703,12 +709,14 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
             {
                 //INIT types
                 case "READY":
+                    LOG.test("Received READY, contains " + content.getJSONArray("guilds").length() + " Guilds.");
                     LOG.debug(String.format("%s -> %s", type, content.toString()));
                     sessionId = content.getString("session_id");
                     handlers.get("READY").handle(responseTotal, raw);
                     break;
                 case "RESUMED":
                     initiating = false;
+                    LOG.test("Received RESUMED.");
                     ready();
                     break;
                 default:
