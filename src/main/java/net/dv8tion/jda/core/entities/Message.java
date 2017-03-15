@@ -729,7 +729,7 @@ public interface Message extends ISnowflake
             }
             catch (Exception e)
             {
-                JDAImpl.LOG.log(e);
+                JDAImpl.LOG.error(((JDAImpl) jda).getShardMarker(), "Failed to download attachment", e);
             }
             finally
             {

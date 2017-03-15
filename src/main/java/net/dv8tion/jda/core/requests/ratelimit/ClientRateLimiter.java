@@ -209,8 +209,7 @@ public class ClientRateLimiter extends RateLimiter
                         }
                         catch (Throwable t)
                         {
-                            Requester.LOG.fatal("Requester system encountered an internal error");
-                            Requester.LOG.log(t);
+                            Requester.LOG.error(getJDA().getShardMarker(), "Requester system encountered an internal error", t);
                             it.remove();
                             if (request != null)
                                 request.onFailure(t);
@@ -228,7 +227,8 @@ public class ClientRateLimiter extends RateLimiter
                             }
                             catch (RejectedExecutionException e)
                             {
-                                Requester.LOG.debug("Caught RejectedExecutionException when re-queuing a ratelimited request. The requester is probably shutdown, thus, this can be ignored.");
+                                Requester.LOG.debug(getJDA().getShardMarker(),
+                                        "Caught RejectedExecutionException when re-queuing a ratelimited request. The requester is probably shutdown, thus, this can be ignored.");
                             }
                         }
                     }
@@ -236,8 +236,7 @@ public class ClientRateLimiter extends RateLimiter
             }
             catch (Throwable err)
             {
-                Requester.LOG.fatal("Requester system encountered an internal error from beyond the synchronized execution blocks. NOT GOOD!");
-                Requester.LOG.log(err);
+                Requester.LOG.error(getJDA().getShardMarker(), "Requester system encountered an internal error from beyond the synchronized execution blocks. NOT GOOD!", err);
             }
         }
 

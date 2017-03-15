@@ -141,7 +141,7 @@ public class TextChannelImpl implements TextChannel
                     }
                     catch (JSONException | NullPointerException e)
                     {
-                        JDAImpl.LOG.log(e);
+                        JDAImpl.LOG.error(api.getShardMarker(), "", e);
                     }
                 }
 

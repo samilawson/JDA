@@ -25,6 +25,7 @@ import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+@Deprecated
 public class SimpleLog
 {
     /**

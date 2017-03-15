@@ -138,7 +138,7 @@ public class RelationshipRemoveHandler extends SocketHandler
                                 relationship));
                 break;
             default:
-                WebSocketClient.LOG.warn("Received a RELATIONSHIP_REMOVE with an unknown RelationshipType! JSON: " + content);
+                WebSocketClient.LOG.warn(api.getShardMarker(), "Received a RELATIONSHIP_REMOVE with an unknown RelationshipType! JSON: {}", content);
                 return null;
         }
         return null;

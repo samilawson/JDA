@@ -53,6 +53,7 @@ public class JDABuilder
 
     protected AccountType accountType;
     protected String token = null;
+    protected String name =  null;
     protected IEventManager eventManager = null;
     protected IAudioSendFactory audioSendFactory = null;
     protected JDA.ShardInfo shardInfo = null;
@@ -334,6 +335,12 @@ public class JDABuilder
         return this;
     }
 
+    public JDABuilder setMarkerName(String name)
+    {
+        this.name = name;
+        return this;
+    }
+
     /**
      * Adds all provided listeners to the list of listeners that will be used to populate the {@link net.dv8tion.jda.core.JDA} object.
      * <br>This uses the {@link net.dv8tion.jda.core.hooks.InterfacedEventManager InterfacedEventListener} by default.
@@ -445,6 +452,7 @@ public class JDABuilder
 
         listeners.forEach(jda::addEventListener);
         jda.setStatus(JDA.Status.INITIALIZED);  //This is already set by JDA internally, but this is to make sure the listeners catch it.
+        jda.setName(name); // This is used for SLF4J Marker session identification, very helpful when hosting multiple sessions in one JVM
 
         // Set the presence information before connecting to have the correct information ready when sending IDENTIFY
         ((PresenceImpl) jda.getPresence())

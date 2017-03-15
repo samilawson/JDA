@@ -33,12 +33,13 @@ import net.dv8tion.jda.core.handle.*;
 import net.dv8tion.jda.core.managers.AudioManager;
 import net.dv8tion.jda.core.managers.impl.AudioManagerImpl;
 import net.dv8tion.jda.core.managers.impl.PresenceImpl;
-import net.dv8tion.jda.core.utils.SimpleLog;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.http.HttpHost;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -49,7 +50,7 @@ import java.util.zip.Inflater;
 
 public class WebSocketClient extends WebSocketAdapter implements WebSocketListener
 {
-    public static final SimpleLog LOG = SimpleLog.getLog("JDASocket");
+    public static final Logger LOG = LoggerFactory.getLogger("JDASocket");
     public static final int DISCORD_GATEWAY_VERSION = 6;
 
     protected final JDAImpl api;
@@ -112,37 +113,37 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
             if (firstInit)
             {
                 firstInit = false;
-                JDAImpl.LOG.info("Finished Loading!");
+                JDAImpl.LOG.info(api.getShardMarker(), "Finished Loading!");
                 if (api.getGuilds().size() >= 2500) //Show large warning when connected to >2500 guilds
                 {
-                    JDAImpl.LOG.warn(" __      __ _    ___  _  _  ___  _  _   ___  _ ");
-                    JDAImpl.LOG.warn(" \\ \\    / //_\\  | _ \\| \\| ||_ _|| \\| | / __|| |");
-                    JDAImpl.LOG.warn("  \\ \\/\\/ // _ \\ |   /| .` | | | | .` || (_ ||_|");
-                    JDAImpl.LOG.warn("   \\_/\\_//_/ \\_\\|_|_\\|_|\\_||___||_|\\_| \\___|(_)");
-                    JDAImpl.LOG.warn("You're running a session with over 2500 connected");
-                    JDAImpl.LOG.warn("guilds. You should shard the connection in order");
-                    JDAImpl.LOG.warn("to split the load or things like resuming");
-                    JDAImpl.LOG.warn("connection might not work as expected.");
-                    JDAImpl.LOG.warn("For more info see https://git.io/vrFWP");
+                    JDAImpl.LOG.warn(api.getShardMarker(), " __      __ _    ___  _  _  ___  _  _   ___  _ ");
+                    JDAImpl.LOG.warn(api.getShardMarker(), " \\ \\    / //_\\  | _ \\| \\| ||_ _|| \\| | / __|| |");
+                    JDAImpl.LOG.warn(api.getShardMarker(), "  \\ \\/\\/ // _ \\ |   /| .` | | | | .` || (_ ||_|");
+                    JDAImpl.LOG.warn(api.getShardMarker(), "   \\_/\\_//_/ \\_\\|_|_\\|_|\\_||___||_|\\_| \\___|(_)");
+                    JDAImpl.LOG.warn(api.getShardMarker(), "You're running a session with over 2500 connected");
+                    JDAImpl.LOG.warn(api.getShardMarker(), "guilds. You should shard the connection in order");
+                    JDAImpl.LOG.warn(api.getShardMarker(), "to split the load or things like resuming");
+                    JDAImpl.LOG.warn(api.getShardMarker(), "connection might not work as expected.");
+                    JDAImpl.LOG.warn(api.getShardMarker(), "For more info see https://git.io/vrFWP");
                 }
                 api.getEventManager().handle(new ReadyEvent(api, api.getResponseTotal()));
             }
             else
             {
                 updateAudioManagerReferences();
-                JDAImpl.LOG.info("Finished (Re)Loading!");
+                JDAImpl.LOG.info(api.getShardMarker(), "Finished (Re)Loading!");
                 api.getEventManager().handle(new ReconnectedEvent(api, api.getResponseTotal()));
             }
         }
         else
         {
-            JDAImpl.LOG.info("Successfully resumed Session!");
+            JDAImpl.LOG.info(api.getShardMarker(), "Successfully resumed Session!");
             api.getEventManager().handle(new ResumedEvent(api, api.getResponseTotal()));
         }
         api.setStatus(JDA.Status.CONNECTED);
-        LOG.debug("Resending " + cachedEvents.size() + " cached events...");
+        LOG.debug(api.getShardMarker(), "Resending {} cached events...", cachedEvents.size());
         handle(cachedEvents);
-        LOG.debug("Sending of cached events finished.");
+        LOG.debug(api.getShardMarker(), "Sending of cached events finished.");
         cachedEvents.clear();
     }
 
@@ -178,7 +179,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
         //Allows 115 messages to be sent before limiting.
         if (this.messagesSent <= 115 || (skipQueue && this.messagesSent <= 119))   //technically we could go to 120, but we aren't going to chance it
         {
-            LOG.trace("<- " + message);
+            LOG.trace(api.getShardMarker(), "<- {}", message);
             socket.sendText(message);
             this.messagesSent++;
             return true;
@@ -187,7 +188,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
         {
             if (!printedRateLimitMessage)
             {
-                LOG.warn("Hit the WebSocket RateLimit! If you see this message a lot then you might need to talk to DV8FromTheWorld.");
+                LOG.warn(api.getShardMarker(), "Hit the WebSocket RateLimit! If you see this message a lot then you might need to talk to DV8FromTheWorld.");
                 printedRateLimitMessage = true;
             }
             return false;
@@ -263,7 +264,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                     }
                     catch (InterruptedException ignored)
                     {
-                        LOG.debug("Main WS send thread interrupted. Most likely JDA is disconnecting the websocket.");
+                        LOG.debug(api.getShardMarker(), "Main WS send thread interrupted. Most likely JDA is disconnecting the websocket.");
                         break;
                     }
                 }
@@ -345,7 +346,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
     public void onConnected(WebSocket websocket, Map<String, List<String>> headers)
     {
         api.setStatus(JDA.Status.LOADING_SUBSYSTEMS);
-        LOG.info("Connected to WebSocket");
+        LOG.info(api.getShardMarker(), "Connected to WebSocket");
         connected = true;
         reconnectTimeoutS = 2;
         messagesSent = 0;
@@ -379,11 +380,11 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
             rawCloseCode = serverCloseFrame.getCloseCode();
             closeCode = CloseCode.from(rawCloseCode);
             if (closeCode == CloseCode.RATE_LIMITED)
-                LOG.fatal("WebSocket connection closed due to ratelimit! Sent more than 120 websocket messages in under 60 seconds!");
+                LOG.error(api.getShardMarker(), "WebSocket connection closed due to ratelimit! Sent more than 120 websocket messages in under 60 seconds!");
             else if (closeCode != null)
-                LOG.debug("WebSocket connection closed with code " + closeCode);
+                LOG.debug(api.getShardMarker(), "WebSocket connection closed with code {}", closeCode);
             else
-                LOG.warn("WebSocket connection closed with unknown meaning for close-code " + rawCloseCode);
+                LOG.warn(api.getShardMarker(), "WebSocket connection closed with unknown meaning for close-code {}", rawCloseCode);
         }
 
         // null is considered -reconnectable- as we do not know the close-code meaning
@@ -398,8 +399,8 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                 //it is possible that a token can be invalidated due to too many reconnect attempts
                 //or that a bot reached a new shard minimum and cannot connect with the current settings
                 //if that is the case we have to drop our connection and inform the user with a fatal error message
-                LOG.fatal("WebSocket connection was closed and cannot be recovered due to identification issues");
-                LOG.fatal(closeCode);
+                LOG.error(api.getShardMarker(), "WebSocket connection was closed and cannot be recovered due to identification issues");
+                LOG.error(api.getShardMarker(), "Accompanied CloseCode {}", closeCode);
             }
 
             api.setStatus(JDA.Status.SHUTDOWN);
@@ -414,7 +415,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
 
     protected void reconnect()
     {
-        LOG.warn("Got disconnected from WebSocket (Internet?!)... Attempting to reconnect in " + reconnectTimeoutS + "s");
+        LOG.warn(api.getShardMarker(), "Got disconnected from WebSocket (Internet?!)... Attempting to reconnect in {}s", reconnectTimeoutS);
         while(shouldReconnect)
         {
             try
@@ -424,7 +425,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                 api.setStatus(JDA.Status.ATTEMPTING_TO_RECONNECT);
             }
             catch(InterruptedException ignored) {}
-            LOG.warn("Attempting to reconnect!");
+            LOG.warn(api.getShardMarker(), "Attempting to reconnect!");
             try
             {
                 connect();
@@ -433,7 +434,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
             catch (RuntimeException ex)
             {
                 reconnectTimeoutS = Math.min(reconnectTimeoutS << 1, 900);      //*2, cap at 15min max
-                LOG.warn("Reconnect failed! Next attempt in " + reconnectTimeoutS + "s");
+                LOG.warn(api.getShardMarker(), "Reconnect failed! Next attempt in {}s", reconnectTimeoutS);
             }
         }
     }
@@ -455,27 +456,27 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                 handleEvent(content);
                 break;
             case 1:
-                LOG.debug("Got Keep-Alive request (OP 1). Sending response...");
+                LOG.debug(api.getShardMarker(), "Got Keep-Alive request (OP 1). Sending response...");
                 sendKeepAlive();
                 break;
             case 7:
-                LOG.debug("Got Reconnect request (OP 7). Closing connection now...");
+                LOG.debug(api.getShardMarker(), "Got Reconnect request (OP 7). Closing connection now...");
                 close();
                 break;
             case 9:
-                LOG.debug("Got Invalidate request (OP 9). Invalidating...");
+                LOG.debug(api.getShardMarker(), "Got Invalidate request (OP 9). Invalidating...");
                 invalidate();
                 sendIdentify();
                 break;
             case 10:
-                LOG.debug("Got HELLO packet (OP 10). Initializing keep-alive.");
+                LOG.debug(api.getShardMarker(), "Got HELLO packet (OP 10). Initializing keep-alive.");
                 setupKeepAlive(content.getJSONObject("d").getLong("heartbeat_interval"));
                 break;
             case 11:
-                LOG.trace("Got Heartbeat Ack (OP 11).");
+                LOG.trace(api.getShardMarker(), "Got Heartbeat Ack (OP 11).");
                 break;
             default:
-                LOG.debug("Got unknown op-code: " + opCode + " with content: " + message);
+                LOG.debug(api.getShardMarker(), "Got unknown op-code: {} with content: {}", opCode, message);
         }
     }
 
@@ -520,7 +521,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
 
     protected void sendIdentify()
     {
-        LOG.debug("Sending Identify-packet...");
+        LOG.debug(api.getShardMarker(), "Sending Identify-packet...");
         PresenceImpl presenceObj = (PresenceImpl) api.getPresence();
         JSONObject identify = new JSONObject()
                 .put("op", 2)
@@ -549,7 +550,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
 
     protected void sendResume()
     {
-        LOG.debug("Sending Resume-packet...");
+        LOG.debug(api.getShardMarker(), "Sending Resume-packet...");
         JSONObject resume = new JSONObject()
                 .put("op", 6)
                 .put("d", new JSONObject()
@@ -591,7 +592,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
     protected void updateAudioManagerReferences()
     {
         if (api.getAudioManagerMap().size() > 0)
-            LOG.trace("Updating AudioManager references");
+            LOG.trace(api.getShardMarker(), "Updating AudioManager references");
 
         api.getAudioManagerMap().entrySet().forEach(entry ->
         {
@@ -674,7 +675,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
             }
             else
             {
-                LOG.debug("Caching " + type + " event during init!");
+                LOG.debug(api.getShardMarker(), "Caching {} event during init!", type);
                 cachedEvents.add(raw);
                 return;
             }
@@ -695,7 +696,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
 //        }
 
         JSONObject content = raw.getJSONObject("d");
-        LOG.trace(String.format("%s -> %s", type, content.toString()));
+        LOG.trace(api.getShardMarker(), "{} -> {}", type, content);
 
         try
         {
@@ -703,7 +704,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
             {
                 //INIT types
                 case "READY":
-                    LOG.debug(String.format("%s -> %s", type, content.toString()));
+                    LOG.debug(api.getShardMarker(), "{} -> {}", type, content);
                     sessionId = content.getString("session_id");
                     handlers.get("READY").handle(responseTotal, raw);
                     break;
@@ -716,17 +717,17 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                     if (handler != null)
                         handler.handle(responseTotal, raw);
                     else
-                        LOG.debug("Unrecognized event:\n" + raw);
+                        LOG.debug(api.getShardMarker(), "Unrecognized event:\n{}", raw);
             }
         }
         catch (JSONException ex)
         {
-            LOG.warn("Got an unexpected Json-parse error. Please redirect following message to the devs:\n\t"
-                    + ex.getMessage() + "\n\t" + type + " -> " + content);
+            LOG.warn(api.getShardMarker(), "Got an unexpected Json-parse error. Please redirect following message to the devs:\n\t{}\n\t{} -> {}",
+                    ex.getMessage(), type, content);
         }
         catch (Exception ex)
         {
-            LOG.log(ex);
+            LOG.error(api.getShardMarker(), "", ex);
         }
     }
 

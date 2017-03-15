@@ -23,7 +23,6 @@ import net.dv8tion.jda.core.requests.Request;
 import net.dv8tion.jda.core.requests.Requester;
 import net.dv8tion.jda.core.requests.Route.CompiledRoute;
 import net.dv8tion.jda.core.requests.Route.RateLimit;
-import net.dv8tion.jda.core.utils.SimpleLog;
 import org.json.JSONObject;
 
 import java.time.OffsetDateTime;
@@ -188,11 +187,11 @@ public class BotRateLimiter extends RateLimiter
         {
             if (!bucket.getRoute().equals("gateway")
                     && !bucket.getRoute().equals("users/@me")
-                    && Requester.LOG.getEffectiveLevel().getPriority() <= SimpleLog.Level.DEBUG.getPriority())
+                    && Requester.LOG.isDebugEnabled(getJDA().getShardMarker()) || Requester.LOG.isTraceEnabled(getJDA
+                    ().getShardMarker()))
             {
-                Requester.LOG.debug("Encountered issue with headers when updating a bucket"
-                                  + "\nRoute: " + bucket.getRoute()
-                                  + "\nHeaders: " + headers);
+                Requester.LOG.debug(getJDA().getShardMarker(), "Encountered issue with headers when updating a bucket\nRoute: {}\nHeaders: {}",
+                        bucket.getRoute(), headers);
             }
 
         }
@@ -310,8 +309,7 @@ public class BotRateLimiter extends RateLimiter
                         }
                         catch (Throwable t)
                         {
-                            Requester.LOG.fatal("Requester system encountered an internal error");
-                            Requester.LOG.log(t);
+                            Requester.LOG.error(getJDA().getShardMarker(), "Requester system encountered an internal error", t);
                             it.remove();
                             if (request != null)
                                 request.onFailure(t);
@@ -329,7 +327,7 @@ public class BotRateLimiter extends RateLimiter
                             }
                             catch (RejectedExecutionException e)
                             {
-                                Requester.LOG.debug("Caught RejectedExecutionException when re-queuing a ratelimited request. The requester is probably shutdown, thus, this can be ignored.");
+                                Requester.LOG.debug(getJDA().getShardMarker(), "Caught RejectedExecutionException when re-queuing a ratelimited request. The requester is probably shutdown, thus, this can be ignored.");
                             }
                         }
                     }
@@ -337,8 +335,7 @@ public class BotRateLimiter extends RateLimiter
             }
             catch (Throwable err)
             {
-                Requester.LOG.fatal("Requester system encountered an internal error from beyond the synchronized execution blocks. NOT GOOD!");
-                Requester.LOG.log(err);
+                Requester.LOG.error(getJDA().getShardMarker(), "Requester system encountered an internal error from beyond the synchronized execution blocks. NOT GOOD!", err);
             }
         }
 

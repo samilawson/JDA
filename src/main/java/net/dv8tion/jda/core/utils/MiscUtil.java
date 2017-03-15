@@ -68,14 +68,14 @@ public class MiscUtil
             Method idMethod = entity.getClass().getMethod("getId");
             if(idMethod.getReturnType() != String.class)
             {
-                JDAImpl.LOG.warn("Tried to look up creation-time for entity of class " + entity.getClass().getName() + " which doesn't have the correct id getter");
+                JDAImpl.LOG.warn("Tried to look up creation-time for entity of class {} which doesn't have the correct id getter", entity.getClass().getName());
                 return null;
             }
             String objId = (String) idMethod.invoke(entity);
             return getCreationTime(objId);
         } catch(Exception e)
         {
-            JDAImpl.LOG.warn("Tried to look up creation-time for entity of class " + entity.getClass().getName() + " which doesn't have the correct id getter");
+            JDAImpl.LOG.warn("Tried to look up creation-time for entity of class {} which doesn't have the correct id getter", entity.getClass().getName());
             return null;
         }
     }

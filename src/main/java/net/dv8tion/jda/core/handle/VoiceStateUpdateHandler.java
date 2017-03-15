@@ -227,14 +227,15 @@ public class VoiceStateUpdateHandler extends SocketHandler
             if (call == null)
             {
                 EventCache.get(api).cache(EventCache.Type.CALL, channelId, () -> handle(responseNumber, allContent));
-                EventCache.LOG.debug("Received a VOICE_STATE_UPDATE for a Call that is not yet cached. JSON: " + content);
+                EventCache.LOG.debug(api.getShardMarker(), "Received a VOICE_STATE_UPDATE for a Call that is not yet cached. JSON: {}", content);
                 return;
             }
 
             CallUser cUser = ((JDAClientImpl) api.asClient()).getCallUserMap().get(userId);
             if (cUser != null && !channelId.equals(cUser.getCall().getCallableChannel().getId()))
             {
-                WebSocketClient.LOG.fatal("Received a VOICE_STATE_UPDATE for a user joining a call, but the user was already in a different call! Big error! JSON: " + content);
+                WebSocketClient.LOG.error(api.getShardMarker(),
+                        "Received a VOICE_STATE_UPDATE for a user joining a call, but the user was already in a different call! Big error! JSON: {}", content);
                 ((CallVoiceStateImpl) cUser.getVoiceState()).setInCall(false);
             }
 
@@ -242,7 +243,7 @@ public class VoiceStateUpdateHandler extends SocketHandler
             if (cUser == null)
             {
                 EventCache.get(api).cache(EventCache.Type.USER, userId, () -> handle(responseNumber, allContent));
-                EventCache.LOG.debug("Received a VOICE_STATE_UPDATE for a user that is not yet a a cached CallUser for the call. (groups only). JSON: " + content);
+                EventCache.LOG.debug(api.getShardMarker(), "Received a VOICE_STATE_UPDATE for a user that is not yet a a cached CallUser for the call. (groups only). JSON: {}", content);
                 return;
             }
 
@@ -262,7 +263,7 @@ public class VoiceStateUpdateHandler extends SocketHandler
             if (cUser == null)
             {
                 EventCache.get(api).cache(EventCache.Type.USER, userId, () -> handle(responseNumber, allContent));
-                EventCache.LOG.debug("Received a VOICE_STATE_UPDATE for a User leaving a Call, but the Call was not yet cached! JSON: " + content);
+                EventCache.LOG.debug(api.getShardMarker(), "Received a VOICE_STATE_UPDATE for a User leaving a Call, but the Call was not yet cached! JSON: {}", content);
                 return;
             }
 

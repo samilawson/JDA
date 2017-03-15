@@ -53,7 +53,7 @@ public class GuildMemberRemoveHandler extends SocketHandler
 
         if (member == null)
         {
-            WebSocketClient.LOG.debug("Received GUILD_MEMBER_REMOVE for a Member that does not exist in the specified Guild.");
+            WebSocketClient.LOG.debug(api.getShardMarker(), "Received GUILD_MEMBER_REMOVE for a Member that does not exist in the specified Guild.");
             return null;
         }
 

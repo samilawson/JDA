@@ -44,7 +44,7 @@ public class GuildMembersChunkHandler extends SocketHandler
         Integer expectMemberCount = (Integer) expectedGuildMembers.get(guildId);
 
         JSONArray members = content.getJSONArray("members");
-        JDAImpl.LOG.debug("GUILD_MEMBER_CHUNK for: " + guildId + " \tMembers: " + members.length());
+        JDAImpl.LOG.debug(api.getShardMarker(), "GUILD_MEMBER_CHUNK for: {} \tMembers: {}", guildId, members.length());
         memberChunks.add(members);
 
         int currentTotal = 0;
@@ -55,7 +55,7 @@ public class GuildMembersChunkHandler extends SocketHandler
 
         if (currentTotal >= expectMemberCount)
         {
-            JDAImpl.LOG.debug("Finished chunking for: " + guildId);
+            JDAImpl.LOG.debug(api.getShardMarker(), "Finished chunking for: {}", guildId);
             EntityBuilder.get(api).createGuildSecondPass(guildId, memberChunks);
             memberChunksCache.remove(guildId);
             expectedGuildMembers.remove(guildId);
@@ -66,12 +66,12 @@ public class GuildMembersChunkHandler extends SocketHandler
     public void setExpectedGuildMembers(String guildId, int count)
     {
         if (expectedGuildMembers.get(guildId) != null)
-            JDAImpl.LOG.warn("Set the count of expected users from GuildMembersChunk even though a value already exists! GuildId: " + guildId);
+            JDAImpl.LOG.warn(api.getShardMarker(), "Set the count of expected users from GuildMembersChunk even though a value already exists! GuildId: {}", guildId);
 
         expectedGuildMembers.put(guildId, count);
 
         if (memberChunksCache.get(guildId) != null)
-            JDAImpl.LOG.warn("Set the memberChunks for MemberChunking for a guild that was already setup for chunking! GuildId: " + guildId);
+            JDAImpl.LOG.warn(api.getShardMarker(), "Set the memberChunks for MemberChunking for a guild that was already setup for chunking! GuildId: {}", guildId);
 
         memberChunksCache.put(guildId, new LinkedList<>());
     }

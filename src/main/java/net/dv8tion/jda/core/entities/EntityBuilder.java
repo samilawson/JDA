@@ -196,7 +196,7 @@ public class EntityBuilder
                 MemberImpl member = (MemberImpl) guildObj.getMembersMap().get(userId);
 
                 if (member == null)
-                    WebSocketClient.LOG.debug("Received a ghost presence in GuildFirstPass! Guild: " + guildObj + " UserId: " + userId);
+                    WebSocketClient.LOG.debug(api.getShardMarker(), "Received a ghost presence in GuildFirstPass! Guild: {} UserId: {}", guildObj, userId);
                 else
                     createPresence(member, presence);
             }
@@ -224,7 +224,7 @@ public class EntityBuilder
                         guildObj.setAfkChannel(newChannel);
                 }
                 else
-                    WebSocketClient.LOG.fatal("Received a channel for a guild that isn't a text or voice channel. JSON: " + channel);
+                    WebSocketClient.LOG.error(api.getShardMarker(), "Received a channel for a guild that isn't a text or voice channel. JSON: {}", channel);
             }
         }
 
@@ -325,7 +325,7 @@ public class EntityBuilder
             guildObj.setOwner(owner);
 
         if (guildObj.getOwner() == null)
-            WebSocketClient.LOG.fatal("Never set the Owner of the Guild: " + guildObj.getId() + " because we don't have the owner User object! How?!");
+            WebSocketClient.LOG.error(api.getShardMarker(), "Never set the Owner of the Guild: {} because we don't have the owner User object! How?!", guildId);
 
         JSONArray channels = guildJson.getJSONArray("channels");
         createGuildChannelPass(guildObj, channels);
@@ -352,7 +352,7 @@ public class EntityBuilder
 
             MemberImpl member = (MemberImpl) guild.getMembersMap().get(userId);
             if (member == null)
-                WebSocketClient.LOG.fatal("Received a Presence for a non-existent Member when dealing with GuildSync!");
+                WebSocketClient.LOG.warn(api.getShardMarker(), "Received a Presence for a non-existent Member when dealing with GuildSync!");
             else
                 this.createPresence(member, presenceJson);
         }
@@ -383,7 +383,7 @@ public class EntityBuilder
                 channelObj = api.getVoiceChannelById(channel.getString("id"));
             }
             else
-                WebSocketClient.LOG.fatal("Received a channel for a guild that isn't a text or voice channel (ChannelPass). JSON: " + channel);
+                WebSocketClient.LOG.error(api.getShardMarker(), "Received a channel for a guild that isn't a text or voice channel (ChannelPass). JSON: {}", channel);
 
             if (channelObj != null)
             {
@@ -397,7 +397,7 @@ public class EntityBuilder
                     catch (IllegalArgumentException e)
                     {
                         //Caused by Discord not properly clearing PermissionOverrides when a Member leaves a Guild.
-                        WebSocketClient.LOG.debug(e.getMessage() + ". Ignoring PermissionOverride.");
+                        WebSocketClient.LOG.debug(api.getShardMarker(), "{}. Ignoring PermissionOverride.", e.getMessage());
                     }
                 }
             }
@@ -416,8 +416,8 @@ public class EntityBuilder
             Member member = guildObj.getMembersMap().get(voiceStateJson.getString("user_id"));
             if (member == null)
             {
-                WebSocketClient.LOG.fatal("Received a VoiceState for a unknown Member! GuildId: "
-                        + guildObj.getId() + " MemberId: " + voiceStateJson.getString("user_id"));
+                WebSocketClient.LOG.error(api.getShardMarker(), "Received a VoiceState for a unknown Member! GuildId: {} MemberId: {}",
+                        guildObj.getId(), voiceStateJson.getString("user_id"));
                 continue;
             }
 
@@ -509,8 +509,8 @@ public class EntityBuilder
             Role r = guild.getRolesMap().get(roleId);
             if (r == null)
             {
-                WebSocketClient.LOG.debug("Received a Member with an unknown Role. MemberId: "
-                        + member.getUser().getId() + " GuildId: " + guild.getId() + " roleId: " + roleId);
+                WebSocketClient.LOG.debug(api.getShardMarker(), "Received a Member with an unknown Role. MemberId: {} GuildId: {} roleId: {}",
+                        member.getUser().getId(), guild.getId(), roleId);
             }
             else
             {

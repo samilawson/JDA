@@ -31,13 +31,14 @@ import net.dv8tion.jda.core.requests.Route.CompiledRoute;
 import net.dv8tion.jda.core.requests.ratelimit.BotRateLimiter;
 import net.dv8tion.jda.core.requests.ratelimit.ClientRateLimiter;
 import net.dv8tion.jda.core.requests.ratelimit.IBucket;
-import net.dv8tion.jda.core.utils.SimpleLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class Requester
 {
-    public static final SimpleLog LOG = SimpleLog.getLog("JDARequester");
+    public static final Logger LOG = LoggerFactory.getLogger("JDARequester");
     public static String USER_AGENT = "JDA DiscordBot (" + JDAInfo.GITHUB + ", " + JDAInfo.VERSION + ")";
     public static final String DISCORD_API_PREFIX = "https://discordapp.com/api/";
 
@@ -123,10 +124,10 @@ public class Requester
             int attempt = 1;
             while (attempt < 4 && response.getStatus() != 429 && response.getBody() != null && response.getBody().startsWith("<"))
             {
-                LOG.debug(String.format("Requesting %s -> %s returned HTML... retrying (attempt %d)",
+                LOG.debug(api.getShardMarker(), "Requesting {} -> {} returned HTML... retrying (attempt {})",
                         request.getHttpRequest().getHttpMethod().name(),
                         request.getHttpRequest().getUrl(),
-                        attempt));
+                        attempt);
                 try
                 {
                     Thread.sleep(50 * attempt);
@@ -153,7 +154,7 @@ public class Requester
         }
         catch (UnirestException e)
         {
-            LOG.log(e); //This originally only printed on DEBUG in 2.x
+            LOG.error(api.getShardMarker(), "UnirestException caused by REST Request", e); //This originally only printed on DEBUG in 2.x
             apiRequest.getRestAction().handleResponse(new Response(e), apiRequest);
             return null;
         }

@@ -26,9 +26,10 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.entities.impl.JDAImpl;
-import net.dv8tion.jda.core.utils.SimpleLog;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tomp2p.opuswrapper.Opus;
 
 import java.net.DatagramPacket;
@@ -46,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 
 public class AudioConnection
 {
-    public static final SimpleLog LOG = SimpleLog.getLog("JDAAudioConn");
+    public static final Logger LOG = LoggerFactory.getLogger("JDAAudioConn");
     public static final int OPUS_SAMPLE_RATE = 48000;   //(Hz) We want to use the highest of qualities! All the bandwidth!
     public static final int OPUS_FRAME_SIZE = 960;      //An opus frame size of 960 at 48000hz represents 20 milliseconds of audio.
     public static final int OPUS_FRAME_TIME_AMOUNT = 20;//This is 20 milliseconds. We are only dealing with 20ms opus packets.
@@ -109,7 +110,7 @@ public class AudioConnection
                     }
                     catch (InterruptedException e)
                     {
-                        LOG.log(e);
+                        LOG.error(api.getShardMarker(), "", e);
                         Thread.currentThread().interrupt();
                     }
                 }
@@ -176,8 +177,8 @@ public class AudioConnection
             {
                 //Different User already existed with this ssrc. What should we do? Just replace? Probably should nuke the old opusDecoder.
                 //Log for now and see if any user report the error.
-                LOG.fatal("Yeah.. So.. JDA received a UserSSRC update for an ssrc that already had a User set. Inform DV8FromTheWorld.\n" +
-                        "ChannelId: " + channel.getId() + " SSRC: " + ssrc + " oldId: " + previousId + " newId: " + userId);
+                LOG.error(((JDAImpl) getJDA()).getShardMarker(), "Yeah.. So.. JDA received a UserSSRC update for an ssrc that already had a User set. Inform DV8FromTheWorld.\n" +
+                        "ChannelId: {} SSRC: {} oldId: {} newId: {}", channel.getId(), ssrc, previousId, userId);
             }
         }
         else
@@ -290,7 +291,7 @@ public class AudioConnection
                     }
                     catch (SocketException e)
                     {
-                        LOG.log(e);
+                        LOG.error(((JDAImpl) getJDA()).getShardMarker(), "", e);
                     }
                     while (!udpSocket.isClosed() && !this.isInterrupted())
                     {
@@ -318,7 +319,7 @@ public class AudioConnection
                                     //If the bytes are silence, then this was caused by a User joining the voice channel,
                                     // and as such, we haven't yet received information to pair the SSRC with the UserId.
                                     if (!Arrays.equals(audio, silenceBytes))
-                                        LOG.debug("Received audio data with an unknown SSRC id. Ignoring");
+                                        LOG.debug(((JDAImpl) getJDA()).getShardMarker(), "Received audio data with an unknown SSRC id. Ignoring");
 
                                     continue;
                                 }
@@ -329,13 +330,13 @@ public class AudioConnection
                                 }
                                 if (!decoder.isInOrder(decryptedPacket.getSequence()))
                                 {
-                                    LOG.trace("Got out-of-order audio packet. Ignoring.");
+                                    LOG.trace(((JDAImpl) getJDA()).getShardMarker(), "Got out-of-order audio packet. Ignoring.");
                                     continue;
                                 }
 
                                 User user = getJDA().getUserById(userId);
                                 if (user == null)
-                                    LOG.warn("Received audio data with a known SSRC, but the userId associate with the SSRC is unknown to JDA!");
+                                    LOG.warn(((JDAImpl) getJDA()).getShardMarker(), "Received audio data with a known SSRC, but the userId associate with the SSRC is unknown to JDA!");
                                 else
                                 {
 //                                    if (decoder.wasPacketLost(decryptedPacket.getSequence()))
@@ -349,7 +350,7 @@ public class AudioConnection
                                     //If decodedAudio is null, then the Opus decode failed, so throw away the packet.
                                     if (decodedAudio == null)
                                     {
-                                        LOG.trace("Received audio data but Opus failed to properly decode, instead it returned an error");
+                                        LOG.trace(((JDAImpl) getJDA()).getShardMarker(), "Received audio data but Opus failed to properly decode, instead it returned an error");
                                     }
                                     else
                                     {
@@ -388,7 +389,7 @@ public class AudioConnection
                         }
                         catch (Exception e)
                         {
-                            LOG.log(e);
+                            LOG.error(((JDAImpl) getJDA()).getShardMarker(), "", e);
                         }
                     }
                 }
@@ -471,7 +472,7 @@ public class AudioConnection
                 }
                 catch (Exception e)
                 {
-                    LOG.log(e);
+                    LOG.error(((JDAImpl) getJDA()).getShardMarker(), "", e);
                 }
             }, 0, 20, TimeUnit.MILLISECONDS);
         }
@@ -556,7 +557,7 @@ public class AudioConnection
             }
             catch (Exception e)
             {
-                LOG.log(e);
+                LOG.error(((JDAImpl) getJDA()).getShardMarker(), "", e);
             }
 
             if (nextPacket != null)
@@ -568,16 +569,16 @@ public class AudioConnection
         @Override
         public void onConnectionError(ConnectionStatus status)
         {
-            LOG.warn("IAudioSendSystem reported a connection error of: " + status);
-            LOG.warn("Shutting down AudioConnection.");
+            LOG.warn(((JDAImpl) getJDA()).getShardMarker(), "IAudioSendSystem reported a connection error of: " + status);
+            LOG.warn(((JDAImpl) getJDA()).getShardMarker(), "Shutting down AudioConnection.");
             webSocket.close(status);
         }
 
         @Override
         public void onConnectionLost()
         {
-            LOG.warn("Closing AudioConnection due to inability to send audio packets.");
-            LOG.warn("Cannot send audio packet because JDA cannot navigate the route to Discord.\n" +
+            LOG.warn(((JDAImpl) getJDA()).getShardMarker(), "Closing AudioConnection due to inability to send audio packets.");
+            LOG.warn(((JDAImpl) getJDA()).getShardMarker(), "Cannot send audio packet because JDA cannot navigate the route to Discord.\n" +
                     "Are you sure you have internet connection? It is likely that you've lost connection.");
             webSocket.close(ConnectionStatus.ERROR_LOST_CONNECTION);
         }

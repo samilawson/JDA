@@ -37,10 +37,14 @@ import net.dv8tion.jda.core.managers.AudioManager;
 import net.dv8tion.jda.core.managers.Presence;
 import net.dv8tion.jda.core.managers.impl.PresenceImpl;
 import net.dv8tion.jda.core.requests.*;
-import net.dv8tion.jda.core.utils.SimpleLog;
+import net.dv8tion.jda.core.utils.logging.ShardMarker;
+import net.dv8tion.jda.core.utils.logging.SingletonMarker;
 import org.apache.http.HttpHost;
 import org.apache.http.util.Args;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
 
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
@@ -49,7 +53,8 @@ import java.util.stream.Collectors;
 
 public class JDAImpl implements JDA
 {
-    public static final SimpleLog LOG = SimpleLog.getLog("JDA");
+    public static final Logger LOG = LoggerFactory.getLogger("JDA");
+    protected Marker shardMarker = null;
 
     protected final HashMap<String, User> users = new HashMap<>(200);
     protected final HashMap<String, Guild> guilds = new HashMap<>(10);
@@ -77,6 +82,7 @@ public class JDAImpl implements JDA
     protected SelfUser selfUser;
     protected ShardInfo shardInfo;
     protected String token = null;
+    protected String name = null;
     protected boolean audioEnabled;
     protected boolean useShutdownHook;
     protected boolean bulkDeleteSplittingEnabled;
@@ -108,7 +114,12 @@ public class JDAImpl implements JDA
         setToken(token);
         verifyToken();
         this.shardInfo = shardInfo;
-        LOG.info("Login Successful!");
+        this.shardMarker = new ShardMarker(shardInfo);
+        if (name != null)
+        {
+            getShardMarker().add(new SingletonMarker(name));
+        }
+        LOG.info(getShardMarker(), "Login Successful!");
 
         client = new WebSocketClient(this);
 
@@ -123,6 +134,11 @@ public class JDAImpl implements JDA
                 }
             });
         }
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
     }
 
     public void setStatus(Status status)
@@ -660,5 +676,9 @@ public class JDAImpl implements JDA
             return "JDA";
     }
 
+    public Marker getShardMarker()
+    {
+        return shardMarker;
+    }
 
 }
