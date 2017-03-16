@@ -278,6 +278,22 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
         socket.sendClose(1000);
     }
 
+    public void guardClose()
+    {
+        WebSocket wSocket = socket;
+        wSocket.clearListeners();
+        wSocket.addListener(new WebSocketAdapter()
+        {
+            @Override
+            public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer)
+            {
+                LOG.test("An orphaned WebSocket was disconnected.");
+            }
+        });
+        LOG.test("Orphaning a WebSocket... expect a close message within 1 minute. Starting manual reconnect.");
+        onDisconnected(null, null, null, false);
+    }
+
     /*
         ### Start Internal methods ###
      */
