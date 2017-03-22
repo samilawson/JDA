@@ -1,1 +1,3 @@
 rootProject.name = 'JDA'
+if (file('../simplelog').exists())
+    includeBuild '../simplelog'

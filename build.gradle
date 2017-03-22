@@ -40,6 +40,10 @@ targetCompatibility = 1.8
 
 repositories {
     jcenter()
+    maven {
+        name 'jitpack.io'
+        url 'https://jitpack.io'
+    }
 }
 
 sourceSets {
@@ -54,7 +58,8 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.5'
     compile 'org.apache.commons:commons-collections4:4.1'
     compile 'org.json:json:20160810'
-    compile "org.slf4j:slf4j-api:1.7.24"
+    compile 'org.slf4j:slf4j-api:1.7.24'
+    compileOnly 'com.github.JDA-Applications:simplelog:v1.0'
 
     //Native Library Support
     compile 'net.java.dev.jna:jna:4.2.2'
@@ -68,6 +73,7 @@ dependencies {
     //Sets the dependencies for the examples
     examplesCompile configurations.compile
     examplesRuntime configurations.runtime
+    testRuntime configurations.runtime + configurations.compileOnly
 }
 
 task sourcesForRelease(type: Copy) {
@@ -190,8 +196,8 @@ String getProjectProperty(String propertyName)
     return property
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.1'
+wrapper{
+    gradleVersion = '3.4.1'
 }
 
 

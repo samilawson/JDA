@@ -15,12 +15,9 @@
  */
 
 /**
- * SLF4J Logger implementation
- * that can optionally be used in JDA.
+ * SLF4J Logger details.
  *
- * <p>To use this implementation you have to provide
- * a <a href="https://www.slf4j.org/api/org/slf4j/impl/StaticLoggerBinder.html" target="_blank">org.slf4j.impl.StaticLoggerBinder</a>
- * and return the {@link net.dv8tion.jda.core.utils.logging.JDALoggerFactory JDALoggerFactory}
- * as the {@link org.slf4j.ILoggerFactory ILoggerFactory}!
+ * This includes {@link org.slf4j.Marker Markers} that are used to
+ * mark specific Shards and Sessions of JDA.
  */
 package net.dv8tion.jda.core.utils.logging;
