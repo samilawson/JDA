@@ -492,6 +492,7 @@ public class JDAImpl implements JDA
         getClient().setAutoReconnect(false);
         getClient().close();
         getRequester().shutdown();
+        getEventManager().destroy();
 
         if (free)
         {

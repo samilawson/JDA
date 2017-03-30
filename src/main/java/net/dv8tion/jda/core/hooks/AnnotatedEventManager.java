@@ -15,6 +15,7 @@
  */
 package net.dv8tion.jda.core.hooks;
 
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.impl.JDAImpl;
 import net.dv8tion.jda.core.events.Event;
 
@@ -22,6 +23,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Implementation for {@link net.dv8tion.jda.core.hooks.IEventManager IEventManager}
@@ -47,8 +51,10 @@ import java.util.*;
  */
 public class AnnotatedEventManager implements IEventManager
 {
-    private final Set<Object> listeners = new HashSet<>();
-    private final Map<Class<? extends Event>, Map<Object, List<Method>>> methods = new HashMap<>();
+    protected final Set<Object> listeners = ConcurrentHashMap.newKeySet();
+    protected final Map<Class<? extends Event>, Map<Object, List<Method>>> methods = new HashMap<>();
+    protected final BlockingQueue<Event> bufferedEvents = new LinkedBlockingQueue<>();
+    protected Thread worker = null;
 
     @Override
     public void register(Object listener)
@@ -75,36 +81,17 @@ public class AnnotatedEventManager implements IEventManager
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void handle(Event event)
     {
-        Class<? extends Event> eventClass = event.getClass();
-        do
-        {
-            Map<Object, List<Method>> listeners = methods.get(eventClass);
-            if (listeners != null)
-            {
-                listeners.entrySet().forEach(e -> e.getValue().forEach(method ->
-                {
-                    try
-                    {
-                        method.setAccessible(true);
-                        method.invoke(e.getKey(), event);
-                    }
-                    catch (IllegalAccessException | InvocationTargetException e1)
-                    {
-                        JDAImpl.LOG.log(e1);
-                    }
-                    catch (Throwable throwable)
-                    {
-                        JDAImpl.LOG.fatal("One of the EventListeners had an uncaught exception");
-                        JDAImpl.LOG.log(throwable);
-                    }
-                }));
-            }
-            eventClass = eventClass == Event.class ? null : (Class<? extends Event>) eventClass.getSuperclass();
-        }
-        while (eventClass != null);
+        bufferedEvents.add(event);
+        setupWorker(event.getJDA());
+    }
+
+    @Override
+    public void destroy()
+    {
+        if (worker != null && worker.isAlive())
+            worker.interrupt();
     }
 
     private void updateMethods()
@@ -140,5 +127,65 @@ public class AnnotatedEventManager implements IEventManager
                 }
             }
         }
+    }
+
+    private void processEvent() throws InterruptedException
+    {
+        Event event = bufferedEvents.take();
+        Class<? extends Event> eventClass = event.getClass();
+        do
+        {
+            Map<Object, List<Method>> listeners = methods.get(eventClass);
+            if (listeners != null)
+            {
+                listeners.forEach((key, value) -> value.forEach(method ->
+                {
+                    try
+                    {
+                        method.setAccessible(true);
+                        method.invoke(key, event);
+                    }
+                    catch (IllegalAccessException | InvocationTargetException e1)
+                    {
+                        JDAImpl.LOG.log(e1);
+                    }
+                    catch (Throwable throwable)
+                    {
+                        JDAImpl.LOG.fatal("One of the EventListeners had an uncaught exception");
+                        JDAImpl.LOG.log(throwable);
+                    }
+                }));
+            }
+            eventClass = eventClass == Event.class ? null : (Class<? extends Event>) eventClass.getSuperclass();
+
+        }
+        while (eventClass != null);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setupWorker(JDA api)
+    {
+        if (worker != null && worker.isAlive())
+            return;
+        JDAImpl impl = (JDAImpl) api;
+        Runnable runnable = () ->
+        {
+            while (!Thread.currentThread().isInterrupted())
+            {
+                try
+                {
+                    processEvent();
+                }
+                catch (InterruptedException e)
+                {
+                    break;
+                }
+            }
+        };
+
+        worker = new Thread(runnable, "JDA-AnnotatedEventManager Worker "
+                + (impl != null ? impl.getIdentifierString() : ""));
+        worker.setDaemon(true);
+        worker.start();
     }
 }

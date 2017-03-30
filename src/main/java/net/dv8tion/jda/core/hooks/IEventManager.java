@@ -72,6 +72,11 @@ public interface IEventManager
     void handle(Event event);
 
     /**
+     * Called when JDA is shutting down to free resources
+     */
+    default void destroy() { }
+
+    /**
      * The currently registered listeners
      *
      * @return An immutable list of listeners

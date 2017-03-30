@@ -15,13 +15,14 @@
  */
 package net.dv8tion.jda.core.hooks;
 
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.impl.JDAImpl;
 import net.dv8tion.jda.core.events.Event;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 
 /**
  * An {@link net.dv8tion.jda.core.hooks.IEventManager IEventManager} implementation
@@ -39,12 +40,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class InterfacedEventManager implements IEventManager
 {
-    private final CopyOnWriteArrayList<EventListener> listeners = new CopyOnWriteArrayList<>();
-
-    public InterfacedEventManager()
-    {
-
-    }
+    protected final CopyOnWriteArrayList<EventListener> listeners = new CopyOnWriteArrayList<>();
+    protected final BlockingQueue<Event> bufferedEvents = new LinkedBlockingQueue<>();
+    protected Thread worker = null;
 
     /**
      * {@inheritDoc}
@@ -77,6 +75,20 @@ public class InterfacedEventManager implements IEventManager
     @Override
     public void handle(Event event)
     {
+        bufferedEvents.add(event);
+        setupWorker(event.getJDA());
+    }
+
+    @Override
+    public void destroy()
+    {
+        if (worker != null && worker.isAlive())
+            worker.interrupt();
+    }
+
+    private void processEvent() throws InterruptedException
+    {
+        Event event = bufferedEvents.take();
         for (EventListener listener : listeners)
         {
             try
@@ -89,5 +101,31 @@ public class InterfacedEventManager implements IEventManager
                 JDAImpl.LOG.log(throwable);
             }
         }
+    }
+
+    private void setupWorker(JDA api)
+    {
+        if (worker != null && worker.isAlive())
+            return;
+        JDAImpl impl = (JDAImpl) api;
+        Runnable runnable = () ->
+        {
+            while (!Thread.currentThread().isInterrupted())
+            {
+                try
+                {
+                    processEvent();
+                }
+                catch (InterruptedException e)
+                {
+                    break;
+                }
+            }
+        };
+
+        worker = new Thread(runnable, "JDA-InterfacedEventManager Worker "
+                + (impl != null ? impl.getIdentifierString() : ""));
+        worker.setDaemon(true);
+        worker.start();
     }
 }

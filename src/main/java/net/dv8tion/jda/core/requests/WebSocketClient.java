@@ -79,8 +79,9 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
     protected final LinkedList<String> ratelimitQueue = new LinkedList<>();
     protected volatile Thread ratelimitThread = null;
     protected volatile long ratelimitResetTime;
+    protected volatile int missedHeartbeats;
     protected volatile int messagesSent;
-    protected volatile boolean printedRateLimitMessage = false;
+    protected volatile boolean printedRateLimitMessage;
 
     protected boolean firstInit = true;
 
@@ -474,6 +475,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                 break;
             case 11:
                 LOG.trace("Got Heartbeat Ack (OP 11).");
+                missedHeartbeats = 0;
                 api.setPing(System.currentTimeMillis() - heartbeatStartTime);
                 break;
             default:
@@ -483,6 +485,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
 
     protected void setupKeepAlive(long timeout)
     {
+        missedHeartbeats = 0;
         keepAliveThread = new Thread(() ->
         {
             while (connected)
@@ -509,6 +512,14 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
 
     protected void sendKeepAlive()
     {
+        if (missedHeartbeats > 2) // missed 3 HEARTBEAT_ACK dispatches in a row
+        {
+            LOG.fatal("Did not received HEARTBEAT_ACK, assuming session died! Reconnecting...");
+            socket.disconnect(WebSocketCloseCode.UNEXTENDED);
+            return;
+        }
+
+        missedHeartbeats++;
         String keepAlivePacket =
                 new JSONObject()
                     .put("op", 1)
