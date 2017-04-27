@@ -30,6 +30,9 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.entities.impl.GuildImpl;
 import net.dv8tion.jda.core.entities.impl.JDAImpl;
+import net.dv8tion.jda.core.etf.EtfReader;
+import net.dv8tion.jda.core.etf.EtfWriter;
+import net.dv8tion.jda.core.etf.utils.ByteArrayDataInput;
 import net.dv8tion.jda.core.events.*;
 import net.dv8tion.jda.core.handle.*;
 import net.dv8tion.jda.core.managers.AudioManager;
@@ -42,13 +45,11 @@ import org.apache.http.HttpHost;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.zip.DataFormatException;
-import java.util.zip.Inflater;
 
 public class WebSocketClient extends WebSocketAdapter implements WebSocketListener
 {
@@ -80,7 +81,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
     //GuildId, <TimeOfNextAttempt, AudioConnection>
     protected final TLongObjectMap<MutablePair<Long, VoiceChannel>> queuedAudioConnections = MiscUtil.newLongMap();
 
-    protected final LinkedList<String> ratelimitQueue = new LinkedList<>();
+    protected final LinkedList<Object> ratelimitQueue = new LinkedList<>();
     protected volatile Thread ratelimitThread = null;
     protected volatile long ratelimitResetTime;
     protected volatile int messagesSent;
@@ -166,12 +167,22 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
         events.forEach(this::handleEvent);
     }
 
+    public void send(JSONObject message)
+    {
+        ratelimitQueue.addLast(writer.writeMessage(message));
+    }
+
     public void send(String message)
     {
         ratelimitQueue.addLast(message);
     }
 
-    private boolean send(String message, boolean skipQueue)
+    private boolean send(JSONObject message, boolean skipQueue)
+    {
+        return send(writer.writeMessage(message), skipQueue);
+    }
+
+    private boolean send(byte[] message, boolean skipQueue)
     {
         if (!connected)
             return false;
@@ -188,8 +199,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
         //Allows 115 messages to be sent before limiting.
         if (this.messagesSent <= 115 || (skipQueue && this.messagesSent <= 119))   //technically we could go to 120, but we aren't going to chance it
         {
-            LOG.trace("<- " + message);
-            socket.sendText(message);
+            socket.sendBinary(message);
             this.messagesSent++;
             return true;
         }
@@ -235,7 +245,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                                             .put("self_mute", audioManager.isSelfMuted())
                                             .put("self_deaf", audioManager.isSelfDeafened())
                                     );
-                            needRatelimit = !send(audioConnectPacket.toString(), false);
+                            needRatelimit = !send(audioConnectPacket, false);
                             if (!needRatelimit)
                             {
                                 //If we didn't get RateLimited, Next allowed connect request will be 2 seconds from now
@@ -254,7 +264,8 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                         }
                         else
                         {
-                            String message = ratelimitQueue.peekFirst();
+                            byte[] message = (byte[]) ratelimitQueue.peekFirst();
+
                             if (message != null)
                             {
                                 needRatelimit = !send(message, false);
@@ -282,6 +293,8 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
         ratelimitThread.start();
     }
 
+    EtfWriter writer = new EtfWriter(true);
+    
     public void close()
     {
         socket.sendClose(1000);
@@ -343,7 +356,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                 }
             };
 
-            return gateway.complete(false) + "?encoding=json&v=" + DISCORD_GATEWAY_VERSION;
+            return gateway.complete(false) + "?encoding=etf&v=" + DISCORD_GATEWAY_VERSION;
         }
         catch (Exception ex)
         {
@@ -458,10 +471,17 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
         }
     }
 
+    EtfReader reader = new EtfReader(false);
+
     @Override
     public void onTextMessage(WebSocket websocket, String message)
     {
-        JSONObject content = new JSONObject(message);
+        LOG.debug("A text message??? " + message);
+        onMessage(new JSONObject(message));
+    }
+
+    private void onMessage(JSONObject content)
+    {
         int opCode = content.getInt("op");
 
         if (!content.isNull("s"))
@@ -489,15 +509,15 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                 break;
             case 10:
                 LOG.debug("Got HELLO packet (OP 10). Initializing keep-alive.");
-                setupKeepAlive(content.getJSONObject("d").getLong("heartbeat_interval"));
+                setupKeepAlive(content.getJSONObject("d").getInt("heartbeat_interval"));
                 break;
             case 11:
                 LOG.trace("Got Heartbeat Ack (OP 11).");
                 api.setPing(System.currentTimeMillis() - heartbeatStartTime);
                 break;
             default:
-                LOG.debug("Got unknown op-code: " + opCode + " with content: " + message);
-        }
+                LOG.debug("Got unknown op-code: " + opCode + " with content: " + content.toString());
+        }        
     }
 
     protected void setupKeepAlive(long timeout)
@@ -528,11 +548,11 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
 
     protected void sendKeepAlive()
     {
-        String keepAlivePacket =
+        byte[] keepAlivePacket = writer.writeMessage(
                 new JSONObject()
                     .put("op", 1)
                     .put("d", api.getResponseTotal()
-                ).toString();
+                ));
 
         if (!send(keepAlivePacket, true))
             ratelimitQueue.addLast(keepAlivePacket);
@@ -565,7 +585,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                         .put(shardInfo.getShardId())
                         .put(shardInfo.getShardTotal()));
         }
-        send(identify.toString(), true);
+        send(identify, true);
     }
 
     protected void sendResume()
@@ -578,7 +598,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                         .put("token", api.getToken())
                         .put("seq", api.getResponseTotal())
                 );
-        send(resume.toString(), true);
+        send(resume, true);
     }
 
     protected void invalidate()
@@ -700,7 +720,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                 return;
             }
         }
-//
+
 //        // Needs special handling due to content of "d" being an array
 //        if(type.equals("PRESENCE_REPLACE"))
 //        {
@@ -754,21 +774,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
     @Override
     public void onBinaryMessage(WebSocket websocket, byte[] binary) throws UnsupportedEncodingException, DataFormatException
     {
-        //Thanks to ShadowLordAlpha for code and debugging.
-        //Get the compressed message and inflate it
-        StringBuilder builder = new StringBuilder();
-        Inflater decompresser = new Inflater();
-        decompresser.setInput(binary, 0, binary.length);
-        byte[] result = new byte[128];
-        while(!decompresser.finished())
-        {
-            int resultLength = decompresser.inflate(result);
-            builder.append(new String(result, 0, resultLength, "UTF-8"));
-        }
-        decompresser.end();
-
-        // send the inflated message to the TextMessage method
-        onTextMessage(websocket, builder.toString());
+        onMessage(reader.readMessage(new ByteArrayDataInput(binary)));
     }
 
     @Override

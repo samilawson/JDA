@@ -208,7 +208,7 @@ public class EntityBuilder
                 {
                     VoiceChannel newChannel = createVoiceChannel(channel, guildObj.getIdLong(), false);
                     if (!guild.isNull("afk_channel_id")
-                            && newChannel.getId().equals(guild.getString("afk_channel_id")))
+                            && newChannel.getIdLong() == guild.getLong("afk_channel_id"))
                         guildObj.setAfkChannel(newChannel);
                 }
                 else
@@ -251,7 +251,7 @@ public class EntityBuilder
                     JSONObject obj = new JSONObject()
                             .put("op", 12)
                             .put("guild_id", guildObj.getId());
-                    api.getClient().send(obj.toString());
+                    api.getClient().send(obj);
                 }
                 JSONObject obj = new JSONObject()
                         .put("op", 8)
@@ -260,7 +260,7 @@ public class EntityBuilder
                                 .put("query","")
                                 .put("limit", 0)
                         );
-                api.getClient().send(obj.toString());
+                api.getClient().send(obj);
             }
             else
             {
@@ -391,7 +391,7 @@ public class EntityBuilder
             }
             else
             {
-                throw new RuntimeException("Got permission_override for unknown channel with id: " + channel.getString("id"));
+                throw new RuntimeException("Got permission_override for unknown channel with id: " + channel.getLong("id"));
             }
         }
     }
@@ -761,7 +761,7 @@ public class EntityBuilder
             {
                 JSONObject jsonAttachment = jsonAttachments.getJSONObject(i);
                 attachments.add(new Message.Attachment(
-                        jsonAttachment.getString("id"),
+                        jsonAttachment.getLong("id"),
                         jsonAttachment.getString("url"),
                         jsonAttachment.getString("proxy_url"),
                         jsonAttachment.getString("filename"),
@@ -831,7 +831,7 @@ public class EntityBuilder
                     {
                         //We do this to properly order the mentions. The array given by discord is out of order sometimes.
 
-                        String mentionId = mention.getString("id");
+                        long mentionId = mention.getLong("id");
                         int index = content.indexOf("<@" + mentionId + ">");
                         if (index < 0)
                             index = content.indexOf("<@!" + mentionId + ">");

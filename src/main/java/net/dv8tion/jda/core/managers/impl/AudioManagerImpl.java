@@ -346,7 +346,7 @@ public class AudioManagerImpl implements AudioManager
                             .put("self_mute", isSelfMuted())
                             .put("self_deaf", isSelfDeafened())
                     );
-            api.getClient().send(voiceStateChange.toString());
+            api.getClient().send(voiceStateChange);
         }
     }
 

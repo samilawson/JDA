@@ -328,7 +328,7 @@ public class AudioWebSocket extends WebSocketAdapter
                     .put("self_mute", false)
                     .put("self_deaf", false)
                 );
-            api.getClient().send(obj.toString());
+            api.getClient().send(obj);
         }
         if (keepAliveRunnable != null)
         {
