@@ -169,10 +169,10 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
 
     public void send(JSONObject message)
     {
-        ratelimitQueue.addLast(writer.writeMessage(message));
+        send(writer.writeMessage(message));
     }
 
-    public void send(String message)
+    public void send(byte[] message)
     {
         ratelimitQueue.addLast(message);
     }
@@ -240,8 +240,8 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                             JSONObject audioConnectPacket = new JSONObject()
                                     .put("op", 4)
                                     .put("d", new JSONObject()
-                                            .put("guild_id", channel.getGuild().getId())
-                                            .put("channel_id", channel.getId())
+                                            .put("guild_id", channel.getGuild().getIdLong())
+                                            .put("channel_id", channel.getIdLong())
                                             .put("self_mute", audioManager.isSelfMuted())
                                             .put("self_deaf", audioManager.isSelfDeafened())
                                     );
@@ -577,7 +577,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
                         )
                         .put("v", DISCORD_GATEWAY_VERSION)
                         .put("large_threshold", 250)
-                        .put("compress", true));    //Used to make the READY event be given as compressed binary data when over a certain size. TY @ShadowLordAlpha
+                        .put("compress", true));    // Not sure if this has any use when using etf
         if (shardInfo != null)
         {
             identify.getJSONObject("d")
@@ -594,7 +594,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
         JSONObject resume = new JSONObject()
                 .put("op", 6)
                 .put("d", new JSONObject()
-                        .put("session_id", sessionId)
+                        .put("session_id", sessionId)   // FIXME: should sessionId be a long when using etf? 
                         .put("token", api.getToken())
                         .put("seq", api.getResponseTotal())
                 );
@@ -661,7 +661,7 @@ public class WebSocketClient extends WebSocketAdapter implements WebSocketListen
 
                 if (mng.isConnected() || mng.isAttemptingToConnect())
                 {
-                    String channelId = mng.isConnected() ? mng.getConnectedChannel().getId() : mng.getQueuedAudioConnection().getId();
+                    long channelId = mng.isConnected() ? mng.getConnectedChannel().getIdLong() : mng.getQueuedAudioConnection().getIdLong();
                     VoiceChannel channel = api.getVoiceChannelById(channelId);
                     if (channel != null)
                     {

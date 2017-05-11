@@ -216,7 +216,7 @@ public class ReadyHandler extends SocketHandler
 
     private void sendGuildSyncRequests()
     {
-        if (guildsRequiringChunking.isEmpty())
+        if (guildsRequiringSyncing.isEmpty())
             return;
 
         JSONArray guildIds = new JSONArray();
@@ -256,7 +256,7 @@ public class ReadyHandler extends SocketHandler
 
         JSONArray guildIds = new JSONArray();
 
-        TLongIterator iterator = guildsRequiringSyncing.iterator();
+        TLongIterator iterator = guildsRequiringChunking.iterator();
         while (iterator.hasNext())
         {
             long guildId = iterator.next();

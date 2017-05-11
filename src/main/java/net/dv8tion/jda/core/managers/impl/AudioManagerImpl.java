@@ -341,8 +341,8 @@ public class AudioManagerImpl implements AudioManager
             JSONObject voiceStateChange = new JSONObject()
                     .put("op", 4)
                     .put("d", new JSONObject()
-                            .put("guild_id", guild.getId())
-                            .put("channel_id", channel.getId())
+                            .put("guild_id", guild.getIdLong())
+                            .put("channel_id", channel.getIdLong())
                             .put("self_mute", isSelfMuted())
                             .put("self_deaf", isSelfDeafened())
                     );

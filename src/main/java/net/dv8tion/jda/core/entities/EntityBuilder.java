@@ -250,7 +250,7 @@ public class EntityBuilder
                 {
                     JSONObject obj = new JSONObject()
                             .put("op", 12)
-                            .put("guild_id", guildObj.getId());
+                            .put("guild_id", guildObj.getIdLong());
                     api.getClient().send(obj);
                 }
                 JSONObject obj = new JSONObject()
