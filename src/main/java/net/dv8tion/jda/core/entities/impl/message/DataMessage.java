@@ -21,6 +21,7 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.entities.impl.MessageImpl;
 import net.dv8tion.jda.core.requests.RestAction;
+import net.dv8tion.jda.core.requests.restaction.AuditableRestAction;
 import org.json.JSONObject;
 
 import java.util.Collections;
@@ -165,7 +166,7 @@ public class DataMessage extends MessageImpl implements Message
     }
 
     @Override
-    public RestAction<Void> delete()
+    public AuditableRestAction<Void> delete()
     {
         throw new UnsupportedOperationException(UNSUPPORTED);
     }
@@ -201,7 +202,7 @@ public class DataMessage extends MessageImpl implements Message
     }
 
     @Override
-    public RestAction<Void> clearReactions()
+    public AuditableRestAction<Void> clearReactions()
     {
         throw new UnsupportedOperationException(UNSUPPORTED);
     }
