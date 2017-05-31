@@ -102,7 +102,7 @@ public interface Game
      */
     static boolean isValidStreamingUrl(String url)
     {
-        return url != null && url.matches("^https?:\\/\\/(www\\.)?twitch\\.tv\\/.+");
+        return url != null && url.matches("^https?://(www\\.)?twitch\\.tv/.+");
     }
 
     /**

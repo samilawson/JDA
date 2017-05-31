@@ -46,15 +46,12 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class EntityBuilder
 {
     public static final String MISSING_CHANNEL = "MISSING_CHANNEL";
     public static final String MISSING_USER = "MISSING_USER";
-
-    private static final Pattern channelMentionPattern = Pattern.compile("<#(\\d+)>");
 
     protected final JDAImpl api;
     protected final TLongObjectMap<JSONObject> cachedGuildJsons = MiscUtil.newLongMap();

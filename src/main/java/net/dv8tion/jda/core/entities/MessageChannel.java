@@ -183,7 +183,7 @@ public interface MessageChannel extends ISnowflake, Formattable
         Args.notEmpty(text, "Provided text for message");
         Args.check(text.length() <= 2000, "Provided text for message must be less than 2000 characters in length");
 
-        return sendMessage(new MessageBuilder().append(text).build());
+        return sendMessage(new MessageBuilder(text).build());
     }
 
     /**
@@ -271,7 +271,7 @@ public interface MessageChannel extends ISnowflake, Formattable
     {
         Args.notNull(embed, "Provided embed");
 
-        return sendMessage(new MessageBuilder().setEmbed(embed).build());
+        return sendMessage(new MessageBuilder(embed).build());
     }
 
     /**
@@ -1740,7 +1740,54 @@ public interface MessageChannel extends ISnowflake, Formattable
         Args.notEmpty(newContent, "Provided message content");
         Args.check(newContent.length() <= 2000, "Provided newContent length must be 2000 or less characters.");
 
-        return editMessageById(messageId, new MessageBuilder().append(newContent).build());
+        return editMessageById(messageId, new MessageBuilder(newContent).build());
+    }
+
+    /**
+     * Attempts to edit a message by its id in this MessageChannel. The string provided as {@code newContent} must
+     * have a length that is greater than 0 and less-than or equal to 2000. This is a Discord message length limitation.
+     *
+     * <p>The following {@link net.dv8tion.jda.core.requests.ErrorResponse ErrorResponses} are possible:
+     * <ul>
+     *     <li>{@link net.dv8tion.jda.core.requests.ErrorResponse#INVALID_AUTHOR_EDIT INVALID_AUTHOR_EDIT}
+     *     <br>Attempted to edit a message that was not sent by the currently logged in account.
+     *         Discord does not allow editing of other users' Messages!</li>
+     *
+     *     <li>{@link net.dv8tion.jda.core.requests.ErrorResponse#MISSING_ACCESS MISSING_ACCESS}
+     *     <br>The request was attempted after the account lost access to the
+     *         {@link net.dv8tion.jda.core.entities.Guild Guild} or {@link net.dv8tion.jda.client.entities.Group Group}
+     *         typically due to being kicked or removed, or after {@link net.dv8tion.jda.core.Permission#MESSAGE_READ Permission.MESSAGE_READ}
+     *         was revoked in the {@link net.dv8tion.jda.core.entities.TextChannel TextChannel}</li>
+     *
+     *     <li>{@link net.dv8tion.jda.core.requests.ErrorResponse#UNKNOWN_MESSAGE UNKNOWN_MESSAGE}
+     *     <br>The provided {@code messageId} is unknown in this MessageChannel, either due to the id being invalid, or
+     *         the message it referred to has already been deleted.</li>
+     *
+     *     <li>{@link net.dv8tion.jda.core.requests.ErrorResponse#UNKNOWN_CHANNEL UNKNOWN_CHANNEL}
+     *     <br>The request was attempted after the channel was deleted.</li>
+     * </ul>
+     *
+     * @param  messageId
+     *         The id referencing the Message that should be edited
+     * @param  newContent
+     *         The new content for the edited message
+     *
+     * @throws IllegalArgumentException
+     *         <ul>
+     *             <li>If provided {@code messageId} is {@code null} or empty.</li>
+     *             <li>If provided {@code newContent} is {@code null} or empty.</li>
+     *             <li>If provided {@code newContent} length is greater than {@code 2000} characters.</li>
+     *         </ul>
+     * @throws net.dv8tion.jda.core.exceptions.PermissionException
+     *         If this is a TextChannel and this account does not have
+     *         {@link net.dv8tion.jda.core.Permission#MESSAGE_READ Permission.MESSAGE_READ}
+     *
+     * @return {@link net.dv8tion.jda.core.requests.RestAction RestAction} - Type: {@link net.dv8tion.jda.core.entities.Message}
+     *         <br>The modified Message after it has been sent to Discord.
+     */
+    default RestAction<Message> editMessageById(long messageId, CharSequence newContent)
+    {
+        return editMessageById(Long.toUnsignedString(messageId), newContent);
     }
 
     /**
@@ -1817,6 +1864,54 @@ public interface MessageChannel extends ISnowflake, Formattable
                 }
             }
         };
+    }
+
+    /**
+     * Attempts to edit a message by its id in this MessageChannel.
+     *
+     * <p>The following {@link net.dv8tion.jda.core.requests.ErrorResponse ErrorResponses} are possible:
+     * <ul>
+     *     <li>{@link net.dv8tion.jda.core.requests.ErrorResponse#INVALID_AUTHOR_EDIT INVALID_AUTHOR_EDIT}
+     *     <br>Attempted to edit a message that was not sent by the currently logged in account.
+     *         Discord does not allow editing of other users' Messages!</li>
+     *
+     *     <li>{@link net.dv8tion.jda.core.requests.ErrorResponse#MISSING_ACCESS MISSING_ACCESS}
+     *     <br>The request was attempted after the account lost access to the
+     *         {@link net.dv8tion.jda.core.entities.Guild Guild} or {@link net.dv8tion.jda.client.entities.Group Group}
+     *         typically due to being kicked or removed, or after {@link net.dv8tion.jda.core.Permission#MESSAGE_READ Permission.MESSAGE_READ}
+     *         was revoked in the {@link net.dv8tion.jda.core.entities.TextChannel TextChannel}</li>
+     *
+     *     <li>{@link net.dv8tion.jda.core.requests.ErrorResponse#UNKNOWN_MESSAGE UNKNOWN_MESSAGE}
+     *     <br>The provided {@code messageId} is unknown in this MessageChannel, either due to the id being invalid, or
+     *         the message it referred to has already been deleted.</li>
+     *
+     *     <li>{@link net.dv8tion.jda.core.requests.ErrorResponse#UNKNOWN_CHANNEL UNKNOWN_CHANNEL}
+     *     <br>The request was attempted after the channel was deleted.</li>
+     * </ul>
+     *
+     * @param  messageId
+     *         The id referencing the Message that should be edited
+     * @param  newContent
+     *         The new content for the edited message
+     *
+     * @throws IllegalArgumentException
+     *         <ul>
+     *             <li>If provided {@code messageId} is not positive.</li>
+     *             <li>If provided {@code newContent} is {@code null}.</li>
+     *             <li>If provided {@link net.dv8tion.jda.core.entities.Message Message}
+     *                 contains a {@link net.dv8tion.jda.core.entities.MessageEmbed MessageEmbed} which
+     *                 is not {@link net.dv8tion.jda.core.entities.MessageEmbed#isSendable(net.dv8tion.jda.core.AccountType) sendable}</li>
+     *         </ul>
+     * @throws net.dv8tion.jda.core.exceptions.PermissionException
+     *         If this is a TextChannel and this account does not have
+     *         {@link net.dv8tion.jda.core.Permission#MESSAGE_READ Permission.MESSAGE_READ}
+     *
+     * @return {@link net.dv8tion.jda.core.requests.RestAction RestAction} - Type: {@link net.dv8tion.jda.core.entities.Message}
+     *         <br>The modified Message
+     */
+    default RestAction<Message> editMessageById(long messageId, Message newContent)
+    {
+        return editMessageById(Long.toUnsignedString(messageId), newContent);
     }
 
     /**
@@ -1946,54 +2041,6 @@ public interface MessageChannel extends ISnowflake, Formattable
      *
      * @param  messageId
      *         The id referencing the Message that should be edited
-     * @param  newContent
-     *         The new content for the edited message
-     *
-     * @throws IllegalArgumentException
-     *         <ul>
-     *             <li>If provided {@code messageId} is not positive.</li>
-     *             <li>If provided {@code newContent} is {@code null}.</li>
-     *             <li>If provided {@link net.dv8tion.jda.core.entities.Message Message}
-     *                 contains a {@link net.dv8tion.jda.core.entities.MessageEmbed MessageEmbed} which
-     *                 is not {@link net.dv8tion.jda.core.entities.MessageEmbed#isSendable(net.dv8tion.jda.core.AccountType) sendable}</li>
-     *         </ul>
-     * @throws net.dv8tion.jda.core.exceptions.PermissionException
-     *         If this is a TextChannel and this account does not have
-     *         {@link net.dv8tion.jda.core.Permission#MESSAGE_READ Permission.MESSAGE_READ}
-     *
-     * @return {@link net.dv8tion.jda.core.requests.RestAction RestAction} - Type: {@link net.dv8tion.jda.core.entities.Message}
-     *         <br>The modified Message
-     */
-    default RestAction<Message> editMessageById(long messageId, Message newContent)
-    {
-        return editMessageById(Long.toUnsignedString(messageId), newContent);
-    }
-
-    /**
-     * Attempts to edit a message by its id in this MessageChannel.
-     *
-     * <p>The following {@link net.dv8tion.jda.core.requests.ErrorResponse ErrorResponses} are possible:
-     * <ul>
-     *     <li>{@link net.dv8tion.jda.core.requests.ErrorResponse#INVALID_AUTHOR_EDIT INVALID_AUTHOR_EDIT}
-     *     <br>Attempted to edit a message that was not sent by the currently logged in account.
-     *         Discord does not allow editing of other users' Messages!</li>
-     *
-     *     <li>{@link net.dv8tion.jda.core.requests.ErrorResponse#MISSING_ACCESS MISSING_ACCESS}
-     *     <br>The request was attempted after the account lost access to the
-     *         {@link net.dv8tion.jda.core.entities.Guild Guild} or {@link net.dv8tion.jda.client.entities.Group Group}
-     *         typically due to being kicked or removed, or after {@link net.dv8tion.jda.core.Permission#MESSAGE_READ Permission.MESSAGE_READ}
-     *         was revoked in the {@link net.dv8tion.jda.core.entities.TextChannel TextChannel}</li>
-     *
-     *     <li>{@link net.dv8tion.jda.core.requests.ErrorResponse#UNKNOWN_MESSAGE UNKNOWN_MESSAGE}
-     *     <br>The provided {@code messageId} is unknown in this MessageChannel, either due to the id being invalid, or
-     *         the message it referred to has already been deleted.</li>
-     *
-     *     <li>{@link net.dv8tion.jda.core.requests.ErrorResponse#UNKNOWN_CHANNEL UNKNOWN_CHANNEL}
-     *     <br>The request was attempted after the channel was deleted.</li>
-     * </ul>
-     *
-     * @param  messageId
-     *         The id referencing the Message that should be edited
      * @param  newEmbed
      *         The new {@link net.dv8tion.jda.core.entities.MessageEmbed MessageEmbed} for the edited message
      *
@@ -2015,7 +2062,7 @@ public interface MessageChannel extends ISnowflake, Formattable
      */
     default RestAction<Message> editMessageById(String messageId, MessageEmbed newEmbed)
     {
-        return editMessageById(messageId, new MessageBuilder().setEmbed(newEmbed).build());
+        return editMessageById(messageId, new MessageBuilder(newEmbed).build());
     }
 
     /**

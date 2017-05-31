@@ -25,6 +25,7 @@ import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.requests.RestAction;
 import net.dv8tion.jda.core.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.core.utils.MiscUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.Args;
 import org.json.JSONObject;
@@ -177,18 +178,15 @@ public class MessageImpl implements Message
             Matcher matcher = MentionType.USER.getPattern().matcher(content);
             while (matcher.find())
             {
-                String id = matcher.group(1);
-                User user = api.getUserById(id);
-                if (user == null)
+                try
                 {
-                    try
-                    {
-                        user = api.getFakeUserMap().get(MiscUtil.parseSnowflake(id));
-                    } catch (NumberFormatException ignored) {}
-                }
-
-                if (user != null)
-                    userMentions.add(user);
+                    long id = MiscUtil.parseSnowflake(matcher.group(1));
+                    User user = api.getUserById(id);
+                    if (user == null)
+                        user = api.getFakeUserMap().get(id);
+                    if (user != null)
+                        userMentions.add(user);
+                } catch (NumberFormatException ignored) {}
             }
             userMentions = Collections.unmodifiableList(userMentions);
         }
@@ -205,10 +203,14 @@ public class MessageImpl implements Message
             Matcher matcher = MentionType.CHANNEL.getPattern().matcher(content);
             while (matcher.find())
             {
-                String id = matcher.group(1);
-                TextChannel channel = api.getTextChannelById(id);
-                if (channel != null)
-                    channelMentions.add(channel);
+                try
+                {
+                    String id = matcher.group(1);
+                    TextChannel channel = api.getTextChannelById(id);
+                    if (channel != null)
+                        channelMentions.add(channel);
+                }
+                catch (NumberFormatException ignored) {}
             }
             channelMentions = Collections.unmodifiableList(channelMentions);
         }
@@ -225,14 +227,18 @@ public class MessageImpl implements Message
             Matcher matcher = MentionType.ROLE.getPattern().matcher(content);
             while (matcher.find())
             {
-                String id = matcher.group(1);
-                Role role = null;
-                if (isFromType(ChannelType.TEXT)) // role lookup is faster if its in the same guild (no global map)
-                    role = getGuild().getRoleById(id);
-                if (role == null)
-                    role = api.getRoleById(id);
-                if (role != null)
-                    roleMentions.add(role);
+                try
+                {
+                    long id = MiscUtil.parseSnowflake(matcher.group(1));
+                    Role role = null;
+                    if (isFromType(ChannelType.TEXT)) // role lookup is faster if its in the same guild (no global map)
+                        role = getGuild().getRoleById(id);
+                    if (role == null)
+                        role = api.getRoleById(id);
+                    if (role != null)
+                        roleMentions.add(role);
+                }
+                catch (NumberFormatException ignored) {}
             }
             roleMentions = Collections.unmodifiableList(roleMentions);
         }
@@ -308,9 +314,83 @@ public class MessageImpl implements Message
     }
 
     @Override
-    public boolean isMentioned(IMentionable user, MentionType... types)
+    public boolean isMentioned(IMentionable mentionable, MentionType... types)
     {
-        return mentionsEveryone() || getMentions(types).contains(user);
+        Args.notNull(types, "Mention Types");
+        for (MentionType type : types)
+        {
+            switch (type)
+            {
+                case HERE:
+                {
+                    if (content.contains("@here"))
+                        return true;
+                    break;
+                }
+                case EVERYONE:
+                {
+                    if (content.contains("@everyone"))
+                        return true;
+                    break;
+                }
+                case USER:
+                {
+                    if (mentionable instanceof User)
+                    {
+                        if (getMentionedUsers().contains(mentionable))
+                            return true;
+                    }
+                    else if (mentionable instanceof Member)
+                    {
+                        final Member member = (Member) mentionable;
+                        if (getMentionedUsers().contains(member.getUser()))
+                            return true;
+                    }
+                    break;
+                }
+                case ROLE:
+                {
+                    if (mentionable instanceof Role)
+                    {
+                        if (getMentionedRoles().contains(mentionable))
+                            return true;
+                    }
+                    else if (mentionable instanceof Member)
+                    {
+                        final Member member = (Member) mentionable;
+                        if (CollectionUtils.containsAny(getMentionedRoles(), member.getRoles()))
+                            return true;
+                    }
+                    else if (isFromType(ChannelType.TEXT) && mentionable instanceof User)
+                    {
+                        final Member member = getGuild().getMember((User) mentionable);
+                        if (CollectionUtils.containsAny(getMentionedRoles(), member.getRoles()))
+                            return true;
+                    }
+                    break;
+                }
+                case CHANNEL:
+                {
+                    if (mentionable instanceof TextChannel)
+                    {
+                        if (getMentionedChannels().contains(mentionable))
+                            return true;
+                    }
+                    break;
+                }
+                case EMOTE:
+                {
+                    if (mentionable instanceof Emote)
+                    {
+                        if (getEmotes().contains(mentionable))
+                            return true;
+                    }
+                    break;
+                }
+//              default: continue;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -500,10 +580,7 @@ public class MessageImpl implements Message
             invites = new ArrayList<>();
             Matcher m = INVITE_PATTERN.matcher(getContentRaw());
             while (m.find())
-            {
-                String code = m.group(1);
-                invites.add(code);
-            }
+                invites.add(m.group(1));
             return invites = Collections.unmodifiableList(invites);
         }
     }
@@ -577,13 +654,17 @@ public class MessageImpl implements Message
             Matcher matcher = MentionType.EMOTE.getPattern().matcher(getContentRaw());
             while (matcher.find())
             {
-                final String emoteIdString = matcher.group(2);
-                final long emoteId = Long.parseLong(emoteIdString);
-                String emoteName = matcher.group(1);
-                Emote emote = api.getEmoteById(emoteIdString);
-                if (emote == null)
-                    emote = new EmoteImpl(emoteId, api).setName(emoteName);
-                emoteMentions.add(emote);
+                try
+                {
+                    final long emoteId = MiscUtil.parseSnowflake(matcher.group(2));
+                    final String emoteName = matcher.group(1);
+
+                    Emote emote = api.getEmoteById(emoteId);
+                    if (emote == null)
+                        emote = new EmoteImpl(emoteId, api).setName(emoteName);
+                    emoteMentions.add(emote);
+                }
+                catch (NumberFormatException ignored) {}
             }
             emoteMentions = Collections.unmodifiableList(emoteMentions);
         }
@@ -650,13 +731,6 @@ public class MessageImpl implements Message
         return channel.deleteMessageById(getIdLong());
     }
 
-    public MessageImpl setMentionedUsers(List<User> mentions)
-    {
-        //We don't need to lazy load when we already receive the mentions in the json
-        this.userMentions = mentions;
-        return this;
-    }
-
     @Override
     public boolean equals(Object o)
     {
@@ -685,6 +759,8 @@ public class MessageImpl implements Message
         obj.put("tts",     isTTS);
         if (!embeds.isEmpty())
             obj.put("embed", ((MessageEmbedImpl) embeds.get(0)).toJSONObject());
+        //we don't attach nonce here because this was a received message
+        // and nonce should be 100% unique for each message sent
         return obj;
     }
 
@@ -736,11 +812,13 @@ public class MessageImpl implements Message
         }
     }
 
-    private static class FormatToken {
+    private static class FormatToken
+    {
         public final String format;
         public final int start;
 
-        public FormatToken(String format, int start) {
+        public FormatToken(String format, int start)
+        {
             this.format = format;
             this.start = start;
         }

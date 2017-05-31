@@ -44,6 +44,12 @@ public class MessageBuilder implements Appendable
 
     public MessageBuilder() {}
 
+    public MessageBuilder(CharSequence content)
+    {
+        if (content != null)
+            builder.append(content);
+    }
+
     public MessageBuilder(Message message)
     {
         if (message != null)
@@ -54,6 +60,28 @@ public class MessageBuilder implements Appendable
             if (embeds != null && !embeds.isEmpty())
                 embed = embeds.get(0);
         }
+    }
+
+    public MessageBuilder(MessageBuilder builder)
+    {
+        if (builder != null)
+        {
+            this.isTTS = builder.isTTS;
+            this.builder.append(builder.builder);
+            this.nonce = builder.nonce;
+            this.embed = builder.embed;
+        }
+    }
+
+    public MessageBuilder(EmbedBuilder builder)
+    {
+        if (builder != null)
+            this.embed = builder.build();
+    }
+
+    public MessageBuilder(MessageEmbed embed)
+    {
+        this.embed = embed;
     }
 
     /**
