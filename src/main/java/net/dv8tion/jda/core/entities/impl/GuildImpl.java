@@ -141,8 +141,8 @@ public class GuildImpl implements Guild
                     return;
                 }
 
-                List<Webhook> webhooks = new LinkedList<>();
                 JSONArray array = response.getArray();
+                List<Webhook> webhooks = new ArrayList<>(array.length());
                 EntityBuilder builder = api.getEntityBuilder();
 
                 for (Object object : array)
@@ -157,7 +157,7 @@ public class GuildImpl implements Guild
                     }
                 }
 
-                request.onSuccess(webhooks);
+                request.onSuccess(Collections.unmodifiableList(webhooks));
             }
         };
     }
@@ -221,8 +221,7 @@ public class GuildImpl implements Guild
     {
         Args.notNull(name, "name");
         return Collections.unmodifiableList(members.valueCollection().stream()
-                .filter(m ->
-                    ignoreCase
+                .filter(m -> ignoreCase
                     ? name.equalsIgnoreCase(m.getUser().getName())
                     : name.equals(m.getUser().getName()))
                 .collect(Collectors.toList()));
@@ -233,8 +232,7 @@ public class GuildImpl implements Guild
     {
         Args.notNull(nickname, "nickname");
         return Collections.unmodifiableList(members.valueCollection().stream()
-                .filter(m ->
-                    ignoreCase
+                .filter(m -> ignoreCase
                     ? nickname.equalsIgnoreCase(m.getNickname())
                     : nickname.equals(m.getNickname()))
                 .collect(Collectors.toList()));
@@ -245,8 +243,7 @@ public class GuildImpl implements Guild
     {
         Args.notNull(name, "name");
         return Collections.unmodifiableList(members.valueCollection().stream()
-                .filter(m ->
-                    ignoreCase
+                .filter(m -> ignoreCase
                     ? name.equalsIgnoreCase(m.getEffectiveName())
                     : name.equals(m.getEffectiveName()))
                 .collect(Collectors.toList()));
@@ -292,8 +289,7 @@ public class GuildImpl implements Guild
     {
         Args.notNull(name, "name");
         return Collections.unmodifiableList(textChannels.valueCollection().stream()
-                .filter(tc ->
-                    ignoreCase
+                .filter(tc -> ignoreCase
                     ? name.equalsIgnoreCase(tc.getName())
                     : name.equals(tc.getName()))
                 .collect(Collectors.toList()));
@@ -324,10 +320,9 @@ public class GuildImpl implements Guild
     {
         Args.notNull(name, "name");
         return Collections.unmodifiableList(voiceChannels.valueCollection().stream()
-            .filter(vc ->
-                    ignoreCase
-                    ? name.equalsIgnoreCase(vc.getName())
-                    : name.equals(vc.getName()))
+            .filter(vc -> ignoreCase
+                ? name.equalsIgnoreCase(vc.getName())
+                : name.equals(vc.getName()))
             .collect(Collectors.toList()));
     }
 
@@ -364,10 +359,9 @@ public class GuildImpl implements Guild
     {
         Args.notNull(name, "name");
         return Collections.unmodifiableList(roles.valueCollection().stream()
-                .filter(r ->
-                        ignoreCase
-                        ? name.equalsIgnoreCase(r.getName())
-                        : name.equals(r.getName()))
+                .filter(r -> ignoreCase
+                    ? name.equalsIgnoreCase(r.getName())
+                    : name.equals(r.getName()))
                 .collect(Collectors.toList()));
     }
 
@@ -386,7 +380,7 @@ public class GuildImpl implements Guild
     @Override
     public List<Emote> getEmotes()
     {
-        return Collections.unmodifiableList(new LinkedList<>(emotes.valueCollection()));
+        return Collections.unmodifiableList(new ArrayList<>(emotes.valueCollection()));
     }
 
     @Override
@@ -394,10 +388,9 @@ public class GuildImpl implements Guild
     {
         Args.notNull(name, "name");
         return Collections.unmodifiableList(emotes.valueCollection().parallelStream()
-                .filter(e ->
-                        ignoreCase
-                        ? StringUtils.equalsIgnoreCase(e.getName(), name)
-                        : StringUtils.equals(e.getName(), name))
+                .filter(e -> ignoreCase
+                    ? StringUtils.equalsIgnoreCase(e.getName(), name)
+                    : StringUtils.equals(e.getName(), name))
                 .collect(Collectors.toList()));
     }
 
@@ -625,8 +618,8 @@ public class GuildImpl implements Guild
     @Override
     public List<GuildVoiceState> getVoiceStates()
     {
-        return Collections.unmodifiableList(
-                members.valueCollection().stream().map(Member::getVoiceState).collect(Collectors.toList()));
+        return Collections.unmodifiableList(members.valueCollection().stream()
+                    .map(Member::getVoiceState).collect(Collectors.toList()));
     }
 
     @Override
@@ -852,10 +845,8 @@ public class GuildImpl implements Guild
                     JSONArray array = response.getArray();
                     List<Invite> invites = new ArrayList<>(array.length());
                     for (int i = 0; i < array.length(); i++)
-                    {
                         invites.add(entityBuilder.createInvite(array.getJSONObject(i)));
-                    }
-                    request.onSuccess(invites);
+                    request.onSuccess(Collections.unmodifiableList(invites));
                 }
                 else
                 {

@@ -33,10 +33,7 @@ import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TextChannelImpl extends AbstractChannelImpl<TextChannelImpl> implements TextChannel
@@ -72,8 +69,8 @@ public class TextChannelImpl extends AbstractChannelImpl<TextChannelImpl> implem
                     return;
                 }
 
-                List<Webhook> webhooks = new LinkedList<>();
                 JSONArray array = response.getArray();
+                List<Webhook> webhooks = new ArrayList<>(array.length());
                 EntityBuilder builder = api.getEntityBuilder();
 
                 for (Object object : array)
@@ -88,7 +85,7 @@ public class TextChannelImpl extends AbstractChannelImpl<TextChannelImpl> implem
                     }
                 }
 
-                request.onSuccess(webhooks);
+                request.onSuccess(Collections.unmodifiableList(webhooks));
             }
         };
     }

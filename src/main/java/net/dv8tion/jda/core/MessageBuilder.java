@@ -133,14 +133,6 @@ public class MessageBuilder implements Appendable
         return this;
     }
 
-    /**
-     * Appends a String to the Message.
-     *
-     * @param  text
-     *         the text to append
-     *
-     * @return Returns the {@link net.dv8tion.jda.core.MessageBuilder MessageBuilder} instance. Useful for chaining.
-     */
     @Override
     public MessageBuilder append(CharSequence text)
     {
