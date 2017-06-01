@@ -317,6 +317,8 @@ public class MessageImpl implements Message
     public boolean isMentioned(IMentionable mentionable, MentionType... types)
     {
         Args.notNull(types, "Mention Types");
+        if (types.length == 0)
+            return isMentioned(mentionable, MentionType.values());
         for (MentionType type : types)
         {
             switch (type)
@@ -397,23 +399,6 @@ public class MessageImpl implements Message
     public boolean mentionsEveryone()
     {
         return mentionsEveryone;
-    }
-
-    @Override
-    public boolean mentionsType(MentionType... types)
-    {
-        if (types == null || types.length == 0)
-            return false;
-        if (types.length == 1 && types[0] == MentionType.EVERYONE)
-            return mentionsEveryone;
-        for (MentionType type : types)
-        {
-            Matcher m = type.getPattern().matcher(content);
-            if (!m.find())
-                return false;
-        }
-
-        return true;
     }
 
     @Override

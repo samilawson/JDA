@@ -68,38 +68,92 @@ public interface Message extends ISnowflake, Formattable
     Pattern INVITE_PATTERN = Pattern.compile("(?:https?://)?discord(?:app\\.com/invite|\\.gg)/(\\S+)", Pattern.CASE_INSENSITIVE);
 
     /**
-     * A immutable list of all mentioned users. if no user was mentioned, this list is empty.
-     * <br>In {@link net.dv8tion.jda.core.entities.PrivateChannel PrivateChannel's}, this always returns an empty List
+     * An immutable list of all mentioned {@link net.dv8tion.jda.core.entities.User Users}.
+     * <br>If no user was mentioned, this list is empty.
      *
      * @return immutable list of mentioned users
      */
     List<User> getMentionedUsers();
 
     /**
-     * A immutable list of all mentioned {@link net.dv8tion.jda.core.entities.TextChannel TextChannels}. If none were mentioned, this list is empty.
-     * <br>In {@link net.dv8tion.jda.core.entities.PrivateChannel PrivateChannels} and {@link net.dv8tion.jda.client.entities.Group Groups},
-     * this always returns an empty List.
+     * A immutable list of all mentioned {@link net.dv8tion.jda.core.entities.TextChannel TextChannels}.
+     * <br>If none were mentioned, this list is empty.
+     *
+     * <p><b>This may include TextChannels from other {@link net.dv8tion.jda.core.entities.Guild Guilds}</b>
      *
      * @return immutable list of mentioned TextChannels
      */
     List<TextChannel> getMentionedChannels();
 
     /**
-     * A immutable list of all mentioned {@link net.dv8tion.jda.core.entities.Role Roles}. If none were mentioned, this list is empty.
-     * <br>In {@link net.dv8tion.jda.core.entities.PrivateChannel PrivateChannels} and {@link net.dv8tion.jda.client.entities.Group Groups},
-     * this always returns an empty List.
+     * A immutable list of all mentioned {@link net.dv8tion.jda.core.entities.Role Roles}.
+     * <br>If none were mentioned, this list is empty.
+     *
+     * <p><b>This may include Roles from other {@link net.dv8tion.jda.core.entities.Guild Guilds}</b>
      *
      * @return immutable list of mentioned Roles
      */
     List<Role> getMentionedRoles();
 
+    /**
+     * Creates an immutable list of {@link net.dv8tion.jda.core.entities.Member Members}
+     * representing the users of {@link #getMentionedUsers()} in the specified
+     * {@link net.dv8tion.jda.core.entities.Guild Guild}.
+     * <br>This is only a convenience method and will skip all users that are not in the specified
+     * Guild.
+     *
+     * @param  guild
+     *         Non-null {@link net.dv8tion.jda.core.entities.Guild Guild}
+     *         that will be used to retrieve Members.
+     *
+     * @throws java.lang.IllegalArgumentException
+     *         If the specified Guild is {@code null}
+     *
+     * @return Immutable list of mentioned Members
+     */
     List<Member> getMentionedMembers(Guild guild);
+
+    /**
+     * Creates an immutable list of {@link net.dv8tion.jda.core.entities.Member Members}
+     * representing the users of {@link #getMentionedUsers()} in the
+     * {@link net.dv8tion.jda.core.entities.Guild Guild} this Message was sent in.
+     * <br>This is only a convenience method and will skip all users that are not in the specified Guild.
+     * <br>It will provide the {@link #getGuild()} output Guild to {@link #getMentionedMembers(Guild)}.
+     *
+     * @param  guild
+     *         Non-null {@link net.dv8tion.jda.core.entities.Guild Guild}
+     *         that will be used to retrieve Members.
+     *
+     * @throws java.lang.IllegalStateException
+     *         If this message was not sent in a {@link net.dv8tion.jda.core.entities.TextChannel TextChannel}
+     *
+     * @return Immutable list of mentioned Members
+     */
     List<Member> getMentionedMembers();
 
+    /**
+     * Combines all instances of {@link net.dv8tion.jda.core.entities.IMentionable IMentionable}
+     * filtered by the specified {@link net.dv8tion.jda.core.entities.Message.MentionType MentionType} values.
+     * <br>This does not include {@link #getMentionedMembers()} to avoid duplicates.
+     *
+     * <p>If no MentionType values are given this will fallback to all types.
+     *
+     * @param  types
+     *         Amount of {@link net.dv8tion.jda.core.entities.Message.MentionType MentionTypes}
+     *         to include in the list of mentions
+     *
+     * @throws java.lang.IllegalArgumentException
+     *         If provided with {@code null}
+     *
+     * @return Immutable list of filtered {@link net.dv8tion.jda.core.entities.IMentionable IMentionable} instances
+     */
     List<IMentionable> getMentions(MentionType... types);
 
     /**
-     * Checks if given user was mentioned in this message in any way (@User, @everyone, @here).
+     * Checks if given {@link net.dv8tion.jda.core.entities.IMentionable IMentionable}
+     * was mentioned in this message in any way (@User, @everyone, @here, @Role).
+     * <br>If no filtering {@link net.dv8tion.jda.core.entities.Message.MentionType MentionTypes} are
+     * specified this will fallback to all mention types.
      *
      * @param  mentionable
      *         The mentionable entity to check on.
@@ -107,19 +161,16 @@ public interface Message extends ISnowflake, Formattable
      *         The types to include when checking whether this type was mentioned.
      *         This will be used with {@link #getMentions(Message.MentionType...) getMentions(MentionType...)}
      *
-     * @return True if the given user was mentioned in this message.
+     * @return True, if the given mentionable was mentioned in this message
      */
     boolean isMentioned(IMentionable mentionable, MentionType... types);
 
     /**
      * Indicates if this Message mentions everyone using @everyone or @here.
-     * In {@link net.dv8tion.jda.core.entities.PrivateChannel PrivateChannel's}, this always returns false.
      *
-     * @return True if message is mentioning everyone
+     * @return True, if message is mentioning everyone
      */
     boolean mentionsEveryone();
-
-    boolean mentionsType(MentionType... types);
 
     /**
      * Returns whether or not this Message has been edited before.
@@ -253,6 +304,18 @@ public interface Message extends ISnowflake, Formattable
         return getContentStripped();
     }
 
+    /**
+     * Creates an immutable List of {@link net.dv8tion.jda.core.entities.Invite Invite} codes
+     * that are included in this Message.
+     * <br>This will use the {@link java.util.regex.Pattern Pattern} provided
+     * under {@link #INVITE_PATTERN} to construct a {@link java.util.regex.Matcher Matcher} that will
+     * parse the {@link #getContentRaw()} output and include all codes it finds in a list.
+     *
+     * <p>You can use the codes to retrieve/validate invites via
+     * {@link net.dv8tion.jda.core.entities.Invite#resolve(JDA, String) Invite.resolve(JDA, Strign)}
+     *
+     * @return Immutable list of invite codes
+     */
     List<String> getInvites();
 
     /**
