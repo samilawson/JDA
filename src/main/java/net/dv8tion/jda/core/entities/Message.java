@@ -120,9 +120,6 @@ public interface Message extends ISnowflake, Formattable
      * <br>This is only a convenience method and will skip all users that are not in the specified Guild.
      * <br>It will provide the {@link #getGuild()} output Guild to {@link #getMentionedMembers(Guild)}.
      *
-     * @param  guild
-     *         Non-null {@link net.dv8tion.jda.core.entities.Guild Guild}
-     *         that will be used to retrieve Members.
      *
      * @throws java.lang.IllegalStateException
      *         If this message was not sent in a {@link net.dv8tion.jda.core.entities.TextChannel TextChannel}
@@ -744,8 +741,8 @@ public interface Message extends ISnowflake, Formattable
      *         The reaction request was attempted after the Message had been deleted.</li>
      * </ul>
      *
-     * @param emote
-     *        The {@link net.dv8tion.jda.core.entities.Emote Emote} to add as a reaction to this Message.
+     * @param  emote
+     *         The {@link net.dv8tion.jda.core.entities.Emote Emote} to add as a reaction to this Message.
      *
      * @throws net.dv8tion.jda.core.exceptions.PermissionException
      *         If the MessageChannel this message was sent in was a {@link net.dv8tion.jda.core.entities.TextChannel TextChannel}
@@ -793,8 +790,8 @@ public interface Message extends ISnowflake, Formattable
      *         The reaction request was attempted after the Message had been deleted.</li>
      * </ul>
      *
-     * @param unicode
-     *        The UTF8 emoji to add as a reaction to this Message.
+     * @param  unicode
+     *         The UTF8 emoji to add as a reaction to this Message.
      *
      * @throws net.dv8tion.jda.core.exceptions.PermissionException
      *         If the MessageChannel this message was sent in was a {@link net.dv8tion.jda.core.entities.TextChannel TextChannel}
@@ -803,8 +800,6 @@ public interface Message extends ISnowflake, Formattable
      *             <li>{@link net.dv8tion.jda.core.Permission#MESSAGE_ADD_REACTION Permission.MESSAGE_ADD_REACTION}</li>
      *             <li>{@link net.dv8tion.jda.core.Permission#MESSAGE_HISTORY Permission.MESSAGE_HISTORY}</li>
      *         </ul>
-     *
-     *         {@link net.dv8tion.jda.core.Permission#MESSAGE_ADD_REACTION Permission.MESSAGE_ADD_REACTION} in the channel.
      * @throws java.lang.IllegalArgumentException
      *         If the provided unicode emoji is null or empty.
      *

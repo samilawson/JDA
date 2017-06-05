@@ -26,6 +26,4 @@ public class GroupRecipientRemoveMessageEvent extends GenericGroupRecipientMessa
     {
         super(api, responseNumber, message, group);
     }
-
-    // todo look at structure
 }

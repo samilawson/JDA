@@ -19,9 +19,10 @@ package net.dv8tion.jda.core.events.message;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.MessageType;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.impl.message.SystemMessage;
 
-public class GenericSystemMessageEvent extends GenericMessageEvent
+public abstract class GenericSystemMessageEvent extends GenericMessageEvent
 {
     protected SystemMessage message;
 
@@ -29,6 +30,11 @@ public class GenericSystemMessageEvent extends GenericMessageEvent
     {
         super(api, responseNumber, message.getIdLong(), channel);
         this.message = message;
+    }
+
+    public User getAuthor()
+    {
+        return message.getAuthor();
     }
 
     public MessageType getType()

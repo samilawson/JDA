@@ -26,6 +26,4 @@ public class GroupRecipientAddMessageEvent extends GenericGroupRecipientMessageE
     {
         super(api, responseNumber, message, group);
     }
-
-    //todo look at structure
 }

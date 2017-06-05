@@ -16,9 +16,12 @@
 
 package net.dv8tion.jda.client.events.message.group;
 
+import net.dv8tion.jda.client.entities.Friend;
 import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.ChannelType;
+import net.dv8tion.jda.core.entities.MessageType;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.impl.message.SystemMessage;
 
 public abstract class GenericGroupSystemMessageEvent extends GenericGroupMessageEvent
@@ -29,6 +32,21 @@ public abstract class GenericGroupSystemMessageEvent extends GenericGroupMessage
     {
         super(api, responseNumber, message.getIdLong(), group);
         this.message = message;
+    }
+
+    public User getAuthor()
+    {
+        return message.getAuthor();
+    }
+
+    public Friend getFriend()
+    {
+        return getJDA().asClient().getFriend(getAuthor());
+    }
+
+    public MessageType getType()
+    {
+        return message.getType();
     }
 
     public SystemMessage getMessage()

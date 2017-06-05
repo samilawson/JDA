@@ -104,7 +104,7 @@ import net.dv8tion.jda.core.events.user.*;
  *
  * @see net.dv8tion.jda.core.hooks.EventListener
  */
-public abstract class ListenerAdapter implements EventListener // todo events
+public abstract class ListenerAdapter implements EventListener
 {
     public void onGenericEvent(Event event) {}
 
@@ -253,6 +253,7 @@ public abstract class ListenerAdapter implements EventListener // todo events
     public void onGenericPrivateMessage(GenericPrivateMessageEvent event) {}
     public void onGenericPrivateMessageReaction(GenericPrivateMessageReactionEvent event) {}
     public void onGenericUser(GenericUserEvent event) {}
+    public void onGenericUserPresence(GenericUserPresenceEvent event) {}
     public void onGenericSelfUpdate(GenericSelfUpdateEvent event) {}
     public void onGenericTextChannel(GenericTextChannelEvent event) {}
     public void onGenericTextChannelUpdate(GenericTextChannelUpdateEvent event) {}
@@ -603,6 +604,8 @@ public abstract class ListenerAdapter implements EventListener // todo events
             onGenericEmoteUpdate((GenericEmoteUpdateEvent) event);
         else if (event instanceof GenericSystemMessageEvent)
             onGenericSystemMessage((GenericSystemMessageEvent) event);
+        else if (event instanceof GenericUserPresenceEvent)
+            onGenericUserPresence((GenericUserPresenceEvent) event);
 
         //Generic events that have generic subclasses (the subclasses as above).
         if (event instanceof GenericMessageEvent)

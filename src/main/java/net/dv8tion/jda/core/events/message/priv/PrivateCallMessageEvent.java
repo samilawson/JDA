@@ -17,7 +17,9 @@
 package net.dv8tion.jda.core.events.message.priv;
 
 import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.entities.MessageType;
 import net.dv8tion.jda.core.entities.PrivateChannel;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.impl.message.CallMessage;
 
 public class PrivateCallMessageEvent extends GenericPrivateMessageEvent
@@ -28,6 +30,16 @@ public class PrivateCallMessageEvent extends GenericPrivateMessageEvent
     {
         super(api, responseNumber, message.getIdLong(), channel);
         this.message = message;
+    }
+
+    public User getAuthor()
+    {
+        return message.getAuthor();
+    }
+
+    public MessageType getType()
+    {
+        return message.getType();
     }
 
     public CallMessage getMessage()
