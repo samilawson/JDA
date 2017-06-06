@@ -41,7 +41,7 @@ public class EmbedBuilder
     public final static String ZERO_WIDTH_SPACE = "\u200E";
     public final static Pattern URL_PATTERN = Pattern.compile("\\s*(https?|attachment)://.+\\..{2,}\\s*", Pattern.CASE_INSENSITIVE);
 
-    private final List<MessageEmbed.Field> fields;
+    private final List<MessageEmbed.Field> fields = new LinkedList<>();
     private String url;
     private String title;
     private StringBuilder description = new StringBuilder();
@@ -56,14 +56,10 @@ public class EmbedBuilder
      * Creates an EmbedBuilder to be used to creates an embed to send.
      * <br>Every part of an embed can be removed or cleared by providing {@code null} to the setter method.
      */
-    public EmbedBuilder()
-    {
-        this((MessageEmbed) null);
-    }
+    public EmbedBuilder() { }
 
     public EmbedBuilder(EmbedBuilder builder)
     {
-        this();
         if (builder != null)
         {
             this.fields.addAll(builder.fields);
@@ -87,7 +83,6 @@ public class EmbedBuilder
      */
     public EmbedBuilder(MessageEmbed embed)
     {
-        fields = new LinkedList<>();
         if(embed != null)
         {
             setDescription(embed.getDescription());
@@ -103,7 +98,7 @@ public class EmbedBuilder
                 fields.addAll(embed.getFields());
         }
     }
-    
+
     /**
      * Returns a {@link net.dv8tion.jda.core.entities.MessageEmbed MessageEmbed}
      * that has been checked as being valid for sending.
@@ -124,10 +119,10 @@ public class EmbedBuilder
         return new MessageEmbedImpl(url, title, description, EmbedType.RICH, timestamp,
                 color, thumbnail, null, author, null, footer, image, fields);
     }
-    
+
     /**
      * Checks if the given embed is empty. Empty embeds will throw an exception if built
-     * 
+     *
      * @return true if the embed is empty and cannot be built
      */
     public boolean isEmpty()
@@ -141,6 +136,59 @@ public class EmbedBuilder
                 && footer == null
                 && image == null
                 && fields.isEmpty();
+    }
+
+    /**
+     * The overall length of the current EmbedBuilder in displayed characters.
+     * <br>Represents the {@link net.dv8tion.jda.core.entities.MessageEmbed#getLength() MessageEmbed.getLength()} value.
+     *
+     * @return length of the current builder state
+     */
+    public int length()
+    {
+        int length = description.length();
+        synchronized (fields)
+        {
+            for (MessageEmbed.Field f : fields)
+                length += f.getName().length() + f.getValue().length();
+        }
+        if (title != null)
+            length += title.length();
+        if (author != null)
+            length += author.getName().length();
+        if (footer != null)
+            length += footer.getText().length();
+        return length;
+    }
+
+    /**
+     * Checks whether the constructed {@link net.dv8tion.jda.core.entities.MessageEmbed MessageEmbed}
+     * is within the limits for the specified {@link net.dv8tion.jda.core.AccountType AccountType}
+     * <ul>
+     *     <li>Bot: {@value MessageEmbed#EMBED_MAX_LENGTH_BOT}</li>
+     *     <li>Client: {@value MessageEmbed#EMBED_MAX_LENGTH_CLIENT}</li>
+     * </ul>
+     *
+     * @param  type
+     *         The {@link net.dv8tion.jda.core.AccountType AccountType} to validate
+     *
+     * @throws java.lang.IllegalArgumentException
+     *         If provided with {@code null}
+     *
+     * @return True, if the {@link #length() length} is less or equal to the specific limit
+     */
+    public boolean isValid(AccountType type)
+    {
+        Args.notNull(type, "AccountType");
+        final int length = length();
+        switch (type)
+        {
+            case BOT:
+                return length <= MessageEmbed.EMBED_MAX_LENGTH_BOT;
+            case CLIENT:
+            default:
+                return length <= MessageEmbed.EMBED_MAX_LENGTH_CLIENT;
+        }
     }
 
     /**
