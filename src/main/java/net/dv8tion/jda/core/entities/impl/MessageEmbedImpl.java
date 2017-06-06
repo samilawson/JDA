@@ -44,6 +44,7 @@ public class MessageEmbedImpl implements MessageEmbed
     private final List<Field> fields;
 
     private volatile int length = -1;
+    private volatile JSONObject json = null;
 
     public MessageEmbedImpl(
         String url, String title, String description, EmbedType type, OffsetDateTime timestamp,
@@ -216,65 +217,72 @@ public class MessageEmbedImpl implements MessageEmbed
 
     public JSONObject toJSONObject()
     {
-        JSONObject obj = new JSONObject();
-        if (url != null)
-            obj.put("url", url);
-        if (title != null)
-            obj.put("title", title);
-        if (description != null)
-            obj.put("description", description);
-        if (timestamp != null)
-            obj.put("timestamp", timestamp.format(DateTimeFormatter.ISO_INSTANT));
-        if (color != null)
-            obj.put("color", color.getRGB() & 0xFFFFFF);
-        if (thumbnail != null)
-            obj.put("thumbnail", new JSONObject().put("url", thumbnail.getUrl()));
-        if (siteProvider != null)
+        if (json != null)
+            return json;
+        synchronized (mutex)
         {
-            JSONObject siteProviderObj = new JSONObject();
-            if (siteProvider.getName() != null)
-                siteProviderObj.put("name", siteProvider.getName());
-            if (siteProvider.getUrl() != null)
-                siteProviderObj.put("url", siteProvider.getUrl());
-            obj.put("provider", siteProviderObj);
-        }
-        if (author != null)
-        {
-            JSONObject authorObj = new JSONObject();
-            if (author.getName() != null)
-                authorObj.put("name", author.getName());
-            if (author.getUrl() != null)
-                authorObj.put("url", author.getUrl());
-            if (author.getIconUrl() != null)
-                authorObj.put("icon_url", author.getIconUrl());
-            obj.put("author", authorObj);
-        }
-        if (videoInfo != null)
-            obj.put("video", new JSONObject().put("url", videoInfo.getUrl()));
-        if (footer != null)
-        {
-            JSONObject footerObj = new JSONObject();
-            if (footer.getText() != null)
-                footerObj.put("text", footer.getText());
-            if (footer.getIconUrl() != null)
-                footerObj.put("icon_url", footer.getIconUrl());
-            obj.put("footer", footerObj);
-        }
-        if (image != null)
-            obj.put("image", new JSONObject().put("url", image.getUrl()));
-        if (!fields.isEmpty())
-        {
-            JSONArray fieldsArray = new JSONArray();
-            for (Field field : fields)
+            if (json != null)
+                return json;
+            JSONObject obj = new JSONObject();
+            if (url != null)
+                obj.put("url", url);
+            if (title != null)
+                obj.put("title", title);
+            if (description != null)
+                obj.put("description", description);
+            if (timestamp != null)
+                obj.put("timestamp", timestamp.format(DateTimeFormatter.ISO_INSTANT));
+            if (color != null)
+                obj.put("color", color.getRGB() & 0xFFFFFF);
+            if (thumbnail != null)
+                obj.put("thumbnail", new JSONObject().put("url", thumbnail.getUrl()));
+            if (siteProvider != null)
             {
-                fieldsArray
-                    .put(new JSONObject()
-                    .put("name", field.getName())
-                    .put("value", field.getValue())
-                    .put("inline", field.isInline()));
+                JSONObject siteProviderObj = new JSONObject();
+                if (siteProvider.getName() != null)
+                    siteProviderObj.put("name", siteProvider.getName());
+                if (siteProvider.getUrl() != null)
+                    siteProviderObj.put("url", siteProvider.getUrl());
+                obj.put("provider", siteProviderObj);
             }
-            obj.put("fields", fieldsArray);
+            if (author != null)
+            {
+                JSONObject authorObj = new JSONObject();
+                if (author.getName() != null)
+                    authorObj.put("name", author.getName());
+                if (author.getUrl() != null)
+                    authorObj.put("url", author.getUrl());
+                if (author.getIconUrl() != null)
+                    authorObj.put("icon_url", author.getIconUrl());
+                obj.put("author", authorObj);
+            }
+            if (videoInfo != null)
+                obj.put("video", new JSONObject().put("url", videoInfo.getUrl()));
+            if (footer != null)
+            {
+                JSONObject footerObj = new JSONObject();
+                if (footer.getText() != null)
+                    footerObj.put("text", footer.getText());
+                if (footer.getIconUrl() != null)
+                    footerObj.put("icon_url", footer.getIconUrl());
+                obj.put("footer", footerObj);
+            }
+            if (image != null)
+                obj.put("image", new JSONObject().put("url", image.getUrl()));
+            if (!fields.isEmpty())
+            {
+                JSONArray fieldsArray = new JSONArray();
+                for (Field field : fields)
+                {
+                    fieldsArray
+                        .put(new JSONObject()
+                            .put("name", field.getName())
+                            .put("value", field.getValue())
+                            .put("inline", field.isInline()));
+                }
+                obj.put("fields", fieldsArray);
+            }
+            return json = obj;
         }
-        return obj;
     }
 }
