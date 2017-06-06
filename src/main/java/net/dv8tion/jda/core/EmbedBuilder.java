@@ -177,7 +177,7 @@ public class EmbedBuilder
      *
      * @return True, if the {@link #length() length} is less or equal to the specific limit
      */
-    public boolean isValid(AccountType type)
+    public boolean isValidLength(AccountType type)
     {
         Args.notNull(type, "AccountType");
         final int length = length();

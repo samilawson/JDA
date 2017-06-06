@@ -524,7 +524,7 @@ public interface Message extends ISnowflake, Formattable
     RestAction<Message> editMessage(MessageEmbed newContent);
 
     /**
-     * Edits this Message's content to the provided {@link net.dv8tion.jda.core.entities.MessageEmbed MessageEmbed}.
+     * Edits this Message's content to the provided format.
      * <br>Shortcut for {@link net.dv8tion.jda.core.MessageBuilder#appendFormat(String, Object...)}.
      * <br><b>Messages can only be edited by the account that sent them!</b>.
      *
