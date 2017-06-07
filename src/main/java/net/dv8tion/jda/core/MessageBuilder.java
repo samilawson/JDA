@@ -16,6 +16,7 @@
 package net.dv8tion.jda.core;
 
 import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.entities.impl.MessageEmbedImpl;
 import net.dv8tion.jda.core.entities.impl.message.DataMessage;
 import org.apache.http.util.Args;
 
@@ -40,7 +41,7 @@ public class MessageBuilder implements Appendable
 
     protected boolean isTTS = false;
     protected String nonce;
-    protected MessageEmbed embed;
+    protected MessageEmbedImpl embed;
 
     public MessageBuilder() {}
 
@@ -58,7 +59,7 @@ public class MessageBuilder implements Appendable
             builder.append(message.getContentRaw());
             List<MessageEmbed> embeds = message.getEmbeds();
             if (embeds != null && !embeds.isEmpty())
-                embed = embeds.get(0);
+                embed = (MessageEmbedImpl) embeds.get(0);
         }
     }
 
@@ -76,12 +77,12 @@ public class MessageBuilder implements Appendable
     public MessageBuilder(EmbedBuilder builder)
     {
         if (builder != null)
-            this.embed = builder.build();
+            this.embed = (MessageEmbedImpl) builder.build();
     }
 
     public MessageBuilder(MessageEmbed embed)
     {
-        this.embed = embed;
+        this.embed = (MessageEmbedImpl) embed;
     }
 
     /**
@@ -111,7 +112,7 @@ public class MessageBuilder implements Appendable
      */
     public MessageBuilder setEmbed(MessageEmbed embed)
     {
-        this.embed = embed;
+        this.embed = (MessageEmbedImpl) embed;
         return this;
     }
 

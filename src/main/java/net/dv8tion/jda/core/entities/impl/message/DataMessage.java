@@ -19,6 +19,7 @@ package net.dv8tion.jda.core.entities.impl.message;
 import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.entities.impl.MessageEmbedImpl;
 import net.dv8tion.jda.core.entities.impl.MessageImpl;
 import net.dv8tion.jda.core.requests.RestAction;
 import net.dv8tion.jda.core.requests.restaction.AuditableRestAction;
@@ -29,9 +30,9 @@ import java.util.Collections;
 public class DataMessage extends MessageImpl implements Message
 {
     private static final String UNSUPPORTED = "This operation is not supported for Messages that were created by a MessageBuilder!";
-    private MessageEmbed embed;
+    private MessageEmbedImpl embed;
 
-    public DataMessage(boolean tts, String content, String nonce, MessageEmbed embed)
+    public DataMessage(boolean tts, String content, String nonce, MessageEmbedImpl embed)
     {
         super(0, null, null, false, content.contains("@everyone"), tts, false,
             content, nonce, null, null, Collections.emptyList(), Collections.emptyList(),
@@ -66,7 +67,7 @@ public class DataMessage extends MessageImpl implements Message
         return String.format("DataMessage(%.30s)", getContentRaw());
     }
 
-    public DataMessage setEmbed(MessageEmbed embed)
+    public DataMessage setEmbed(MessageEmbedImpl embed)
     {
         this.embed = embed;
         return this;
@@ -79,7 +80,7 @@ public class DataMessage extends MessageImpl implements Message
         obj.put("content", content);
         obj.put("tts", isTTS);
         if (embed != null)
-            obj.put("embed", embed);
+            obj.put("embed", embed.toJSONObject());
         if (nonce != null)
             obj.put("nonce", nonce);
         return obj;
