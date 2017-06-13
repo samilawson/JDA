@@ -23,6 +23,7 @@ import net.dv8tion.jda.core.requests.RestAction;
 import net.dv8tion.jda.core.requests.restaction.AuditableRestAction;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -939,6 +940,33 @@ public interface Message extends ISnowflake, Formattable
         }
 
         /**
+         * Creates an {@link net.dv8tion.jda.core.entities.Icon Icon} instance for
+         * this attachment if {@link #isImage() isImage()} is {@code true}!
+         * <br>This is a convenience method that can be used to retrieve an Icon from an attachment image link which
+         * requires a set user-agent to be loaded.
+         *
+         * <p>When a global proxy was specified via {@link net.dv8tion.jda.core.JDABuilder JDABuilder} this will use the
+         * specified proxy to create an {@link java.io.InputStream InputStream} otherwise it will use a normal {@link java.net.URLConnection URLConnection}
+         * with the User-Agent for the currently logged in account.
+         *
+         * @throws IOException
+         *         If an IOError occurs while reading the image
+         * @throws java.lang.IllegalStateException
+         *         If this is not an image attachment
+         *
+         * @return {@link net.dv8tion.jda.core.entities.Icon Icon} for this image attachment
+         */
+        public Icon getAsIcon() throws IOException
+        {
+            if (!isImage())
+                throw new IllegalStateException("Cannot create an Icon out of this attachment. This is not an image.");
+            final InputStream in = getInputStream();
+            final Icon icon = Icon.from(in);
+            in.close();
+            return icon;
+        }
+
+        /**
          * Downloads this attachment to given File
          *
          * @param  file
@@ -951,19 +979,7 @@ public interface Message extends ISnowflake, Formattable
             InputStream in = null;
             try
             {
-                URL url = new URL(getUrl());
-                URLConnection con;
-                if (jda.getGlobalProxy() == null)
-                {
-                    con = url.openConnection();
-                }
-                else
-                {
-                    con = url.openConnection(new Proxy(Proxy.Type.HTTP,
-                            new InetSocketAddress(jda.getGlobalProxy().getAddress(), jda.getGlobalProxy().getPort())));
-                }
-                con.addRequestProperty("user-agent", Requester.USER_AGENT);
-                in = con.getInputStream();
+                in = getInputStream();
                 Files.copy(in, Paths.get(file.getAbsolutePath()));
                 return true;
             }
@@ -973,12 +989,26 @@ public interface Message extends ISnowflake, Formattable
             }
             finally
             {
-                if (in != null)
-                {
-                    try {in.close();} catch(Exception ignored) {}
-                }
+                try { in.close(); } catch(Exception ignored) {}
             }
             return false;
+        }
+
+        protected InputStream getInputStream() throws IOException
+        {
+            URL url = new URL(getUrl());
+            URLConnection conn;
+            if (jda.getGlobalProxy() == null)
+            {
+                conn = url.openConnection();
+            }
+            else
+            {
+                conn = url.openConnection(new Proxy(Proxy.Type.HTTP,
+                        new InetSocketAddress(jda.getGlobalProxy().getAddress(), jda.getGlobalProxy().getPort())));
+            }
+            conn.addRequestProperty("user-agent", Requester.USER_AGENT);
+            return conn.getInputStream();
         }
 
         /**
