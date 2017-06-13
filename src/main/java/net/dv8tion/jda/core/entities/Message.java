@@ -960,10 +960,10 @@ public interface Message extends ISnowflake, Formattable
         {
             if (!isImage())
                 throw new IllegalStateException("Cannot create an Icon out of this attachment. This is not an image.");
-            final InputStream in = getInputStream();
-            final Icon icon = Icon.from(in);
-            in.close();
-            return icon;
+            try (InputStream in = getInputStream())
+            {
+                return Icon.from(in);
+            }
         }
 
         /**
@@ -976,20 +976,14 @@ public interface Message extends ISnowflake, Formattable
          */
         public boolean download(File file)
         {
-            InputStream in = null;
-            try
+            try (InputStream in = getInputStream())
             {
-                in = getInputStream();
                 Files.copy(in, Paths.get(file.getAbsolutePath()));
                 return true;
             }
             catch (Exception e)
             {
                 JDAImpl.LOG.log(e);
-            }
-            finally
-            {
-                try { in.close(); } catch(Exception ignored) {}
             }
             return false;
         }
