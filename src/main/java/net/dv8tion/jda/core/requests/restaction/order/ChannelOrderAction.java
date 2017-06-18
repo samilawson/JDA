@@ -40,7 +40,7 @@ import java.util.Collection;
  *
  * @since 3.0
  */
-public class ChannelOrderAction<T extends Channel> extends OrderAction<T, ChannelOrderAction<T>>
+public abstract class ChannelOrderAction<T extends Channel> extends OrderAction<T, ChannelOrderAction<T>>
 {
     protected final Guild guild;
     protected final ChannelType type;
@@ -51,19 +51,20 @@ public class ChannelOrderAction<T extends Channel> extends OrderAction<T, Channe
      * @param guild
      *        The target {@link net.dv8tion.jda.core.entities.Guild Guild}
      *        of which to order the channels defined by the specified type
+     * @param clazz
+     *        The class that extends ChannelOrderAction, used for return types
      * @param type
      *        The {@link net.dv8tion.jda.core.entities.ChannelType ChannelType} corresponding
      *        to the generic type of {@link net.dv8tion.jda.core.entities.Channel Channel} which
      *        defines the type of channel that will be ordered
      */
-    public ChannelOrderAction(Guild guild, ChannelType type)
+    public ChannelOrderAction(Guild guild, Class<? extends ChannelOrderAction<T>> clazz, ChannelType type)
     {
-        super(guild.getJDA(), Route.Guilds.MODIFY_CHANNELS.compile(guild.getId()));
+        super(guild.getJDA(), clazz, Route.Guilds.MODIFY_CHANNELS.compile(guild.getId()));
         this.guild = guild;
         this.type = type;
 
-        Collection chans = type == ChannelType.TEXT ? guild.getTextChannels() : guild.getVoiceChannels();
-        this.orderList.addAll(chans);
+        this.orderList.addAll(getChannels());
     }
 
     /**
@@ -87,6 +88,8 @@ public class ChannelOrderAction<T extends Channel> extends OrderAction<T, Channe
     {
         return type;
     }
+
+    protected abstract Collection<T> getChannels();
 
     @Override
     protected void finalizeData()

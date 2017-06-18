@@ -19,7 +19,6 @@ package net.dv8tion.jda.core.handle;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.impl.JDAImpl;
 import net.dv8tion.jda.core.events.message.MessageBulkDeleteEvent;
-import net.dv8tion.jda.core.requests.GuildLock;
 import org.json.JSONObject;
 
 import java.util.LinkedList;
@@ -40,12 +39,10 @@ public class MessageBulkDeleteHandler extends SocketHandler
         {
             SocketHandler handler = api.getClient().getHandler("MESSAGE_DELETE");
             content.getJSONArray("ids").forEach(id ->
-            {
-                handler.handle(responseNumber, new JSONObject()
-                    .put("d", new JSONObject()
-                        .put("channel_id", Long.toUnsignedString(channelId))
-                        .put("id", id)));
-            });
+                    handler.handle(responseNumber, new JSONObject()
+                        .put("d", new JSONObject()
+                            .put("channel_id", Long.toUnsignedString(channelId))
+                            .put("id", id))));
         }
         else
         {

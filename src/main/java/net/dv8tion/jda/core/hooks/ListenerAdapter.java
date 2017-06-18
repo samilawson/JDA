@@ -262,7 +262,6 @@ public abstract class ListenerAdapter implements EventListener
     public void onGenericEmote(GenericEmoteEvent event) {}
     public void onGenericEmoteUpdate(GenericEmoteUpdateEvent event) {}
 
-
     // ==========================================================================================
     // |                                   Client Only Events                                   |
     // ==========================================================================================

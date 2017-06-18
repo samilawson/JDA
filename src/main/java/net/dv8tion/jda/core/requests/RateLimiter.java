@@ -34,8 +34,8 @@ public abstract class RateLimiter
     protected final Requester requester;
     protected final ScheduledExecutorService pool;
     protected volatile boolean isShutdown;
-    protected volatile ConcurrentHashMap<String, IBucket> buckets = new ConcurrentHashMap<>();
-    protected volatile ConcurrentLinkedQueue<IBucket> submittedBuckets = new ConcurrentLinkedQueue<>();
+    protected final ConcurrentHashMap<String, IBucket> buckets = new ConcurrentHashMap<>();
+    protected final ConcurrentLinkedQueue<IBucket> submittedBuckets = new ConcurrentLinkedQueue<>();
 
     protected RateLimiter(Requester requester, int poolSize)
     {
@@ -44,12 +44,10 @@ public abstract class RateLimiter
         this.pool = Executors.newScheduledThreadPool(poolSize, new RateLimitThreadFactory(requester.getJDA()));
     }
 
-
     // -- Required Implementations --
     public abstract Long getRateLimit(CompiledRoute route);
-    protected abstract void queueRequest(Request request);
+    protected abstract void queueRequest(Request<?> request);
     protected abstract Long handleResponse(CompiledRoute route, HttpResponse<String> response);
-
 
     // --- Default Implementations --
 
@@ -84,7 +82,7 @@ public abstract class RateLimiter
     private class RateLimitThreadFactory implements ThreadFactory
     {
         final String identifier;
-        AtomicInteger threadCount = new AtomicInteger(1);
+        final AtomicInteger threadCount = new AtomicInteger(1);
 
         public RateLimitThreadFactory(JDAImpl api)
         {

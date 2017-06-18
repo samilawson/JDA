@@ -68,7 +68,7 @@ public class MentionPaginationAction extends PaginationAction<Message, MentionPa
      */
     public MentionPaginationAction(JDA api)
     {
-        super(api, 1, 100, 100);
+        super(api, MentionPaginationAction.class, 1, 100, 100);
         this.guild = null;
     }
 
@@ -86,7 +86,7 @@ public class MentionPaginationAction extends PaginationAction<Message, MentionPa
      */
     public MentionPaginationAction(Guild guild)
     {
-        super(guild.getJDA(), 1, 100, 25);
+        super(guild.getJDA(), MentionPaginationAction.class, 1, 100, 25);
         this.guild = guild;
     }
 
@@ -160,7 +160,7 @@ public class MentionPaginationAction extends PaginationAction<Message, MentionPa
             return;
         }
 
-        EntityBuilder builder = api.getEntityBuilder();;
+        EntityBuilder builder = api.getEntityBuilder();
         List<Message> mentions = new LinkedList<>();
         JSONArray arr = response.getArray();
         for (int i = 0; i < arr.length(); i++)

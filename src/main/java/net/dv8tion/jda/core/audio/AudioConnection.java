@@ -98,11 +98,9 @@ public class AudioConnection
             public void run()
             {
                 final long timeout = getGuild().getAudioManager().getConnectTimeout();
-
-                JDAImpl api = (JDAImpl) getJDA();
                 long started = System.currentTimeMillis();
                 boolean connectionTimeout = false;
-                while (!webSocket.isReady() && !connectionTimeout)
+                while (!webSocket.isReady())
                 {
                     if (timeout > 0 && System.currentTimeMillis() - started > timeout)
                     {
@@ -366,13 +364,8 @@ public class AudioConnection
                                         }
                                         if (receiveHandler.canReceiveCombined())
                                         {
-                                            Queue<Pair<Long, short[]>> queue = combinedQueue.get(user);
-                                            if (queue == null)
-                                            {
-                                                queue = new ConcurrentLinkedQueue<>();
-                                                combinedQueue.put(user, queue);
-                                            }
-                                            queue.add(Pair.<Long, short[]>of(System.currentTimeMillis(), decodedAudio));
+                                            Queue<Pair<Long, short[]>> queue = combinedQueue.computeIfAbsent(user, k -> new ConcurrentLinkedQueue<>());
+                                            queue.add(Pair.of(System.currentTimeMillis(), decodedAudio));
                                         }
                                     }
                                 }
@@ -428,17 +421,17 @@ public class AudioConnection
                         {
                             User user = entry.getKey();
                             Queue<Pair<Long, short[]>> queue = entry.getValue();
-            
+
                             if (queue.isEmpty())
                                 continue;
-            
+
                             Pair<Long, short[]> audioData = queue.poll();
                             //Make sure the audio packet is younger than 100ms
                             while (audioData != null && currentTime - audioData.getLeft() > queueTimeout)
                             {
                                 audioData = queue.poll();
                             }
-            
+
                             //If none of the audio packets were younger than 100ms, then there is nothing to add.
                             if (audioData == null)
                             {
@@ -447,7 +440,7 @@ public class AudioConnection
                             users.add(user);
                             audioParts.add(audioData.getRight());
                         }
-            
+
                         if (!audioParts.isEmpty())
                         {
                             int audioLength = audioParts.get(0).length;

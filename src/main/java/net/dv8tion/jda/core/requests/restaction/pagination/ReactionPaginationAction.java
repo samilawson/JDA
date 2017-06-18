@@ -60,7 +60,7 @@ public class ReactionPaginationAction extends PaginationAction<User, ReactionPag
      */
     public ReactionPaginationAction(MessageReaction reaction)
     {
-        super(reaction.getJDA(), 1, 100, 100);
+        super(reaction.getJDA(), ReactionPaginationAction.class, 1, 100, 100);
         this.reaction = reaction;
 
         MessageReaction.ReactionEmote emote = reaction.getEmote();
@@ -78,7 +78,6 @@ public class ReactionPaginationAction extends PaginationAction<User, ReactionPag
     {
         return reaction;
     }
-
 
     @Override
     protected void finalizeRoute()
@@ -107,7 +106,7 @@ public class ReactionPaginationAction extends PaginationAction<User, ReactionPag
             return;
         }
 
-        final EntityBuilder builder = api.getEntityBuilder();;
+        final EntityBuilder builder = api.getEntityBuilder();
         final JSONArray array = response.getArray();
         final List<User> users = new LinkedList<>();
         for (int i = 0; i < array.length(); i++)

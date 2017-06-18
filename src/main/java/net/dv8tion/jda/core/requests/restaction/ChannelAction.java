@@ -326,7 +326,6 @@ public class ChannelAction extends AuditableRestAction<Channel>
         }
 
         this.data = data;
-        super.finalizeData();
     }
 
     @Override
@@ -338,7 +337,7 @@ public class ChannelAction extends AuditableRestAction<Channel>
             return;
         }
 
-        EntityBuilder builder = api.getEntityBuilder();;
+        EntityBuilder builder = api.getEntityBuilder();
         Channel channel = voice
                 ? builder.createVoiceChannel(response.getObject(), guild.getIdLong())
                 : builder.createTextChannel(response.getObject(),  guild.getIdLong());

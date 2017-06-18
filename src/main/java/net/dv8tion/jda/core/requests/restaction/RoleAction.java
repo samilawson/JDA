@@ -22,7 +22,6 @@ import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.requests.Request;
 import net.dv8tion.jda.core.requests.Response;
-import net.dv8tion.jda.core.requests.RestAction;
 import net.dv8tion.jda.core.requests.Route;
 import org.apache.http.util.Args;
 import org.json.JSONObject;
@@ -241,7 +240,6 @@ public class RoleAction extends AuditableRestAction<Role>
             object.put("mentionable", mentionable.booleanValue());
 
         super.data = object;
-        super.finalizeData();
     }
 
     @Override

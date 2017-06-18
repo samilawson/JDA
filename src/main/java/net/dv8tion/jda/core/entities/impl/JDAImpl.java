@@ -94,8 +94,8 @@ public class JDAImpl implements JDA
     protected SelfUser selfUser;
     protected ShardInfo shardInfo;
     protected String token = null;
-    protected boolean audioEnabled;
-    protected boolean bulkDeleteSplittingEnabled;
+    protected final boolean audioEnabled;
+    protected final boolean bulkDeleteSplittingEnabled;
     protected boolean autoReconnect;
     protected long responseTotal;
     protected long ping = -1;
@@ -792,17 +792,6 @@ public class JDAImpl implements JDA
             return "JDA";
     }
 
-    private class JDAThreadFactory implements ThreadFactory
-    {
-        @Override
-        public Thread newThread(Runnable r)
-        {
-            final Thread thread = new Thread(r, "JDA-Thread " + getIdentifierString());
-            thread.setDaemon(true);
-            return thread;
-        }
-    }
-
     public ScheduledThreadPoolExecutor getAudioKeepAlivePool()
     {
         ScheduledThreadPoolExecutor akap = audioKeepAlivePool;
@@ -821,5 +810,16 @@ public class JDAImpl implements JDA
     public EventCache getEventCache()
     {
         return eventCache;
+    }
+
+    private class JDAThreadFactory implements ThreadFactory
+    {
+        @Override
+        public Thread newThread(Runnable r)
+        {
+            final Thread thread = new Thread(r, "JDA-Thread " + getIdentifierString());
+            thread.setDaemon(true);
+            return thread;
+        }
     }
 }

@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class BotRateLimiter extends RateLimiter
 {
     volatile Long timeOffset = null;
-    volatile AtomicLong globalCooldown = new AtomicLong(Long.MIN_VALUE);
+    final AtomicLong globalCooldown = new AtomicLong(Long.MIN_VALUE);
 
     public BotRateLimiter(Requester requester, int poolSize)
     {
@@ -58,7 +58,7 @@ public class BotRateLimiter extends RateLimiter
     }
 
     @Override
-    protected void queueRequest(Request request)
+    protected void queueRequest(Request<?> request)
     {
         if (isShutdown)
             throw new RejectedExecutionException("Cannot queue a request after shutdown");
@@ -207,7 +207,7 @@ public class BotRateLimiter extends RateLimiter
         volatile long resetTime = 0;
         volatile int routeUsageRemaining = 1;    //These are default values to only allow 1 request until we have properly
         volatile int routeUsageLimit = 1;        // ratelimit information.
-        volatile ConcurrentLinkedQueue<Request> requests = new ConcurrentLinkedQueue<>();
+        final ConcurrentLinkedQueue<Request<?>> requests = new ConcurrentLinkedQueue<>();
 
         public Bucket(String route, RateLimit rateLimit)
         {
@@ -220,7 +220,7 @@ public class BotRateLimiter extends RateLimiter
             }
         }
 
-        void addToQueue(Request request)
+        void addToQueue(Request<?> request)
         {
             requests.add(request);
             submitForProcessing();
@@ -294,9 +294,9 @@ public class BotRateLimiter extends RateLimiter
             {
                 synchronized (requests)
                 {
-                    for (Iterator<Request> it = requests.iterator(); it.hasNext(); )
+                    for (Iterator<Request<?>> it = requests.iterator(); it.hasNext(); )
                     {
-                        Request request = null;
+                        Request<?> request = null;
                         try
                         {
                             request = it.next();
@@ -362,7 +362,7 @@ public class BotRateLimiter extends RateLimiter
         }
 
         @Override
-        public Queue<Request> getRequests()
+        public Queue<Request<?>> getRequests()
         {
             return requests;
         }

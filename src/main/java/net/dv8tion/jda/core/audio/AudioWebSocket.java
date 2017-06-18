@@ -136,7 +136,7 @@ public class AudioWebSocket extends WebSocketAdapter
                 int heartbeatInterval = content.getInt("heartbeat_interval");
 
                 //Find our external IP and Port using Discord
-                InetSocketAddress externalIpAndPort = null;
+                InetSocketAddress externalIpAndPort;
 
                 changeStatus(ConnectionStatus.CONNECTING_ATTEMPTING_UDP_DISCOVERY);
                 int tries = 0;
@@ -222,7 +222,6 @@ public class AudioWebSocket extends WebSocketAdapter
                 LOG.debug("Unknown Audio OP code.\n" + contentAll.toString(4));
         }
     }
-
 
     @Override
     public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer)
@@ -464,10 +463,6 @@ public class AudioWebSocket extends WebSocketAdapter
 
             return new InetSocketAddress(ourIP, ourPort);
         }
-        catch (SocketException e)
-        {
-            return null;
-        }
         catch (IOException e)
         {
             return null;
@@ -539,7 +534,7 @@ public class AudioWebSocket extends WebSocketAdapter
     public static class KeepAliveThreadFactory implements ThreadFactory
     {
         final String identifier;
-        AtomicInteger threadCount = new AtomicInteger(1);
+        final AtomicInteger threadCount = new AtomicInteger(1);
 
         public KeepAliveThreadFactory(JDAImpl api)
         {

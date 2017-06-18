@@ -23,7 +23,7 @@ import java.util.concurrent.TimeoutException;
 
 public class CompletedFuture<T> implements Future<T>
 {
-    protected T value;
+    protected final T value;
 
     public CompletedFuture(T value)
     {

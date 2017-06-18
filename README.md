@@ -154,7 +154,7 @@ All dependencies are managed automatically by Gradle.
    * [Github](https://github.com/Mashape/unirest-java)
    * [JCenter Repository](https://bintray.com/bintray/jcenter/com.mashape.unirest%3Aunirest-java/view)
  * Apache Commons Lang3
-   * Version: **3.5**
+   * Version: **3.6**
    * [Website](https://commons.apache.org/proper/commons-lang/)
    * [JCenter Repository](https://bintray.com/bintray/jcenter/org.apache.commons%3Acommons-lang3/view)
  * Apache Commons Collections4

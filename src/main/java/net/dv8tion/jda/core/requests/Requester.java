@@ -39,7 +39,7 @@ public class Requester
 {
     public static final SimpleLog LOG = SimpleLog.getLog("JDARequester");
     public static final String DISCORD_API_PREFIX = "https://discordapp.com/api/";
-    public static String USER_AGENT = "JDA DiscordBot (" + JDAInfo.GITHUB + ", " + JDAInfo.VERSION + ")";
+    public static final String USER_AGENT = "JDA DiscordBot (" + JDAInfo.GITHUB + ", " + JDAInfo.VERSION + ")";
 
     private final JDAImpl api;
     private final RateLimiter rateLimiter;
@@ -198,10 +198,16 @@ public class Requester
                 request = addHeaders(Unirest.put(url)).body(body);
                 break;
             case DELETE:
-                request = addHeaders(Unirest.delete(url));
+                request = addHeaders(Unirest.delete(url)).body(body);
                 break;
             case PATCH:
                 request = addHeaders(Unirest.patch(url)).body(body);
+                break;
+            case HEAD:
+                request = addHeaders(Unirest.head(url));
+                break;
+            case OPTIONS:
+                request = addHeaders(Unirest.options(url)).body(body);
                 break;
         }
         return request;

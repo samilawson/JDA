@@ -34,8 +34,9 @@ import net.dv8tion.jda.core.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.core.requests.restaction.ChannelAction;
 import net.dv8tion.jda.core.requests.restaction.RoleAction;
 import net.dv8tion.jda.core.requests.restaction.WebhookAction;
-import net.dv8tion.jda.core.requests.restaction.order.ChannelOrderAction;
 import net.dv8tion.jda.core.requests.restaction.order.RoleOrderAction;
+import net.dv8tion.jda.core.requests.restaction.order.TextChannelOrderAction;
+import net.dv8tion.jda.core.requests.restaction.order.VoiceChannelOrderAction;
 import net.dv8tion.jda.core.utils.MiscUtil;
 import net.dv8tion.jda.core.utils.PermissionUtil;
 import org.apache.http.util.Args;
@@ -1741,9 +1742,6 @@ public class GuildController
         if (name.length() < 2 || name.length() > 100)
             throw new IllegalArgumentException("Provided name must be 2 - 100 characters in length");
 
-        JSONObject body = new JSONObject()
-                .put("type", "text")
-                .put("name", name);
         Route.CompiledRoute route = Route.Guilds.CREATE_CHANNEL.compile(guild.getId());
         return new ChannelAction(route, name, guild, false);
     }
@@ -1784,9 +1782,6 @@ public class GuildController
         if (name.length() < 2 || name.length() > 100)
             throw new IllegalArgumentException("Provided name must be 2 to 100 characters in length");
 
-        JSONObject body = new JSONObject()
-                .put("type", "voice")
-                .put("name", name);
         Route.CompiledRoute route = Route.Guilds.CREATE_CHANNEL.compile(guild.getId());
         return new ChannelAction(route, name, guild, true);
     }
@@ -1978,8 +1973,6 @@ public class GuildController
      */
     public RoleAction createCopyOfRole(Role role)
     {
-        Route.CompiledRoute route = Route.Roles.CREATE_ROLE.compile(guild.getId());
-
         return createRole()
                 .setColor(role.getColor())
                 .setPermissions(role.getPermissionsRaw())
@@ -2062,7 +2055,7 @@ public class GuildController
                     }
 
                     // put emote into cache
-                    ((GuildImpl) guild).getEmoteMap().put(id, emote);
+                    guild.getEmoteMap().put(id, emote);
 
                     request.onSuccess(emote);
                 }
@@ -2090,9 +2083,9 @@ public class GuildController
      *
      * @return {@link net.dv8tion.jda.core.requests.restaction.order.ChannelOrderAction ChannelOrderAction} - Type: {@link net.dv8tion.jda.core.entities.TextChannel TextChannel}
      */
-    public ChannelOrderAction<TextChannel> modifyTextChannelPositions()
+    public TextChannelOrderAction modifyTextChannelPositions()
     {
-        return new ChannelOrderAction<>(guild, ChannelType.TEXT);
+        return new TextChannelOrderAction(guild);
     }
 
     /**
@@ -2113,9 +2106,9 @@ public class GuildController
      *
      * @return {@link net.dv8tion.jda.core.requests.restaction.order.ChannelOrderAction ChannelOrderAction} - Type: {@link net.dv8tion.jda.core.entities.VoiceChannel VoiceChannel}
      */
-    public ChannelOrderAction<VoiceChannel> modifyVoiceChannelPositions()
+    public VoiceChannelOrderAction modifyVoiceChannelPositions()
     {
-        return new ChannelOrderAction<>(guild, ChannelType.VOICE);
+        return new VoiceChannelOrderAction(guild);
     }
 
     /**

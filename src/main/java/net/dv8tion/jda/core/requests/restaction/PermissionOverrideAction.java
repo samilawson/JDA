@@ -90,7 +90,6 @@ public class PermissionOverrideAction extends AuditableRestAction<PermissionOver
         this.role = role;
     }
 
-
     /**
      * The currently set of allowed permission bits.
      * <br>This value represents all <b>granted</b> permissions
@@ -117,7 +116,6 @@ public class PermissionOverrideAction extends AuditableRestAction<PermissionOver
         return Collections.unmodifiableList(Permission.getPermissions(allow));
     }
 
-
     /**
      * The currently set of denied permission bits.
      * <br>This value represents all <b>denied</b> permissions
@@ -143,7 +141,6 @@ public class PermissionOverrideAction extends AuditableRestAction<PermissionOver
     {
         return Collections.unmodifiableList(Permission.getPermissions(deny));
     }
-
 
     /**
      * The currently set of inherited permission bits.
@@ -176,7 +173,6 @@ public class PermissionOverrideAction extends AuditableRestAction<PermissionOver
         return Permission.getPermissions(getInherited());
     }
 
-
     /**
      * Whether this Action will
      * create a {@link net.dv8tion.jda.core.entities.PermissionOverride PermissionOverride}
@@ -202,7 +198,6 @@ public class PermissionOverrideAction extends AuditableRestAction<PermissionOver
     {
         return role != null;
     }
-
 
     /**
      * Sets the value of explicitly granted permissions
@@ -274,7 +269,6 @@ public class PermissionOverrideAction extends AuditableRestAction<PermissionOver
         return setAllow(Permission.getRaw(permissions));
     }
 
-
     /**
      * Sets the value of explicitly denied permissions
      * using the bitwise representation of a set of {@link net.dv8tion.jda.core.Permission Permissions}.
@@ -345,7 +339,6 @@ public class PermissionOverrideAction extends AuditableRestAction<PermissionOver
         return setDeny(Permission.getRaw(permissions));
     }
 
-
     /**
      * Combination of {@link #setAllow(long)} and {@link #setDeny(long)}
      *
@@ -392,7 +385,6 @@ public class PermissionOverrideAction extends AuditableRestAction<PermissionOver
         return this;
     }
 
-
     @Override
     protected void finalizeData()
     {
@@ -402,7 +394,6 @@ public class PermissionOverrideAction extends AuditableRestAction<PermissionOver
         object.put("deny", deny);
 
         super.data = object;
-        super.finalizeData();
     }
 
     @Override
@@ -414,7 +405,6 @@ public class PermissionOverrideAction extends AuditableRestAction<PermissionOver
             return;
         }
 
-        JSONObject object = response.getObject();
         boolean isMember = isMember();
         long id = isMember ? member.getUser().getIdLong() : role.getIdLong();
         PermissionOverrideImpl override = new PermissionOverrideImpl(channel, id, isMember ? member : role).setAllow(allow).setDeny(deny);

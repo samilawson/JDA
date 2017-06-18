@@ -147,7 +147,7 @@ public abstract class RestAction<T>
 {
     public static final SimpleLog LOG = SimpleLog.getLog("RestAction");
 
-    public static Consumer DEFAULT_SUCCESS = o -> {};
+    public static Consumer<?> DEFAULT_SUCCESS = o -> {};
     public static Consumer<Throwable> DEFAULT_FAILURE = t ->
     {
         if (LOG.getEffectiveLevel().getPriority() <= SimpleLog.Level.DEBUG.getPriority())
@@ -232,12 +232,13 @@ public abstract class RestAction<T>
      *         The failure callback that will be called if the Request
      *         encounters an exception at its execution point.
      */
+    @SuppressWarnings("unchecked")
     public void queue(Consumer<T> success, Consumer<Throwable> failure)
     {
         finalizeData();
         finalizeRoute();
         if (success == null)
-            success = DEFAULT_SUCCESS;
+            success = (Consumer<T>) DEFAULT_SUCCESS;
         if (failure == null)
             failure = DEFAULT_FAILURE;
         api.getRequester().request(new Request<>(this, success, failure, true, finalizeHeaders()));

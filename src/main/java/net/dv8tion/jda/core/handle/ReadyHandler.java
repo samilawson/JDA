@@ -49,7 +49,7 @@ public class ReadyHandler extends SocketHandler
     @Override
     protected Long handleInternally(JSONObject content)
     {
-        EntityBuilder builder = api.getEntityBuilder();;
+        EntityBuilder builder = api.getEntityBuilder();
 
         //Core
         JSONArray guilds = content.getJSONArray("guilds");
@@ -112,16 +112,17 @@ public class ReadyHandler extends SocketHandler
     public void guildLoadComplete(JSONObject content)
     {
         api.getClient().setChunkingAndSyncing(false);
-        EntityBuilder builder = api.getEntityBuilder();;
+        EntityBuilder builder = api.getEntityBuilder();
         JSONArray privateChannels = content.getJSONArray("private_channels");
 
         if (api.getAccountType() == AccountType.CLIENT)
         {
             JSONArray relationships = content.getJSONArray("relationships");
             JSONArray presences = content.getJSONArray("presences");
-            JSONObject notes = content.getJSONObject("notes");
-            JSONArray readstates = content.has("read_state") ? content.getJSONArray("read_state") : null;
-            JSONArray guildSettings = content.has("user_guild_settings") ? content.getJSONArray("user_guild_settings") : null;
+            // TODO: implement notes, read_states and user_guild_settings
+            // JSONObject notes = content.getJSONObject("notes");
+            // JSONArray readstates = content.has("read_state") ? content.getJSONArray("read_state") : null;
+            // JSONArray guildSettings = content.has("user_guild_settings") ? content.getJSONArray("user_guild_settings") : null;
 
             for (int i = 0; i < relationships.length(); i++)
             {
@@ -192,7 +193,6 @@ public class ReadyHandler extends SocketHandler
         else
             checkIfReadyToSendRequests();
     }
-
 
     public void clearCache()
     {

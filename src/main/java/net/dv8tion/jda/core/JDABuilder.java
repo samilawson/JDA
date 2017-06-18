@@ -137,7 +137,7 @@ public class JDABuilder
     {
         if (jdaCreated)
             throw new UnsupportedOperationException("You cannot change the proxy after a JDA object has been created. Proxy settings are global among all instances!");
-        this.proxy = proxy;
+        JDABuilder.proxy = proxy;
         return this;
     }
 

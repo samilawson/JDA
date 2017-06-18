@@ -22,7 +22,6 @@ import net.dv8tion.jda.core.events.user.UserAvatarUpdateEvent;
 import net.dv8tion.jda.core.events.user.UserGameUpdateEvent;
 import net.dv8tion.jda.core.events.user.UserNameUpdateEvent;
 import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
-import net.dv8tion.jda.core.requests.GuildLock;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
@@ -157,8 +156,7 @@ public class PresenceUpdateHandler extends SocketHandler
             }
             else
             {
-                //In this case, this PRESENCE_UPDATE is for a Relation.
-
+                // TODO: In this case, this PRESENCE_UPDATE is for a Relation.
             }
         }
         else
@@ -184,7 +182,7 @@ public class PresenceUpdateHandler extends SocketHandler
             }
             else
             {
-                //cache in relationship stuff
+                // TODO: cache in relationship stuff
             }
         }
         return null;
