@@ -785,7 +785,8 @@ public interface MessageChannel extends ISnowflake, Formattable
         Args.notEmpty(messageId, "messageId");
 
         Route.CompiledRoute route = Route.Messages.DELETE_MESSAGE.compile(getId(), messageId);
-        return new AuditableRestAction<Void>(getJDA(), route, null) {
+        return new AuditableRestAction<Void>(getJDA(), route, null)
+        {
             @Override
             protected void handleResponse(Response response, Request<Void> request)
             {

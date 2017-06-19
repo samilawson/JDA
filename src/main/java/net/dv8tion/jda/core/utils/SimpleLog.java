@@ -50,11 +50,12 @@ public class SimpleLog
      * @param name the name of the LOG
      * @return SimpleLog with given LOG-name
      */
-    public static SimpleLog getLog(String name) {
-        synchronized (LOGS) {
-            if(!LOGS.containsKey(name.toLowerCase())) {
+    public static SimpleLog getLog(String name)
+    {
+        synchronized (LOGS)
+        {
+            if(!LOGS.containsKey(name.toLowerCase()))
                 LOGS.put(name.toLowerCase(), new SimpleLog(name));
-            }
         }
         return LOGS.get(name.toLowerCase());
     }
@@ -77,20 +78,22 @@ public class SimpleLog
      *      If an IO error is encountered while dealing with the file. Most likely
      *      to be caused by a lack of permissions when creating the log folders or files.
      */
-    public static void addFileLogs(File std, File err) throws IOException {
-        if(std != null) {
+    public static void addFileLogs(File std, File err) throws IOException
+    {
+        if(std != null)
+        {
             if (origStd == null)
                 origStd = System.out;
-            if(!std.getAbsoluteFile().getParentFile().exists()) {
+            if(!std.getAbsoluteFile().getParentFile().exists())
                 std.getAbsoluteFile().getParentFile().mkdirs();
-            }
-            if(!std.exists()) {
+            if(!std.exists())
                 std.createNewFile();
-            }
             FileOutputStream fOut = new FileOutputStream(std, true);
-            System.setOut(new PrintStream(new OutputStream() {
+            System.setOut(new PrintStream(new OutputStream()
+            {
                 @Override
-                public void write(int b) throws IOException {
+                public void write(int b) throws IOException
+                {
                     origStd.write(b);
                     fOut.write(b);
                 }
@@ -105,19 +108,20 @@ public class SimpleLog
             stdOut.close();
             origStd = null;
         }
-        if(err != null) {
+        if(err != null)
+        {
             if (origErr == null)
                 origErr = System.err;
-            if(!err.getAbsoluteFile().getParentFile().exists()) {
+            if(!err.getAbsoluteFile().getParentFile().exists())
                 err.getAbsoluteFile().getParentFile().mkdirs();
-            }
-            if(!err.exists()) {
+            if(!err.exists())
                 err.createNewFile();
-            }
             FileOutputStream fOut = new FileOutputStream(err, true);
-            System.setErr(new PrintStream(new OutputStream() {
+            System.setErr(new PrintStream(new OutputStream()
+            {
                 @Override
-                public void write(int b) throws IOException {
+                public void write(int b) throws IOException
+                {
                     origErr.write(b);
                     fOut.write(b);
                 }
@@ -150,9 +154,7 @@ public class SimpleLog
     {
         File canonicalFile = file.getCanonicalFile();
         if (!fileLogs.containsKey(logLevel))
-        {
             fileLogs.put(logLevel, new HashSet<>());
-        }
         fileLogs.get(logLevel).add(canonicalFile);
     }
 
@@ -195,9 +197,7 @@ public class SimpleLog
                 }
             }
             if (set.getValue().isEmpty())
-            {
                 setIter.remove();
-            }
         }
     }
 
@@ -205,10 +205,8 @@ public class SimpleLog
     {
         Set<File> out = new HashSet<>();
         for (Map.Entry<Level, Set<File>> mapEntry : fileLogs.entrySet())
-        {
             if(mapEntry.getKey().getPriority() <= level.getPriority())
                 out.addAll(mapEntry.getValue());
-        }
         return out;
     }
 
@@ -257,7 +255,8 @@ public class SimpleLog
     public final String name;
     private Level level = null;
 
-    private SimpleLog(String name) {
+    private SimpleLog(String name)
+    {
         this.name = name;
     }
 
@@ -268,7 +267,8 @@ public class SimpleLog
      *
      * @param lev the new LOG-level
      */
-    public void setLevel(Level lev) {
+    public void setLevel(Level lev)
+    {
         this.level = lev;
     }
 
@@ -300,23 +300,21 @@ public class SimpleLog
      * @param level The level of the Log
      * @param msg   The message to LOG
      */
-    public void log(Level level, Object msg) {
+    public void log(Level level, Object msg)
+    {
         synchronized (listeners)
         {
             for (LogListener listener : listeners)
-            {
                 listener.onLog(this, level, msg);
-            }
         }
+
         String format = (ENABLE_GUI && !isConsolePresent()) ? MSGFORMAT : FORMAT;
         format = format.replace("%time%", DFORMAT.format(new Date())).replace("%level%", level.getTag()).replace("%name%", name).replace("%text%", String.valueOf(msg));
-        if(level == Level.OFF || level.getPriority() < ((this.level == null) ? SimpleLog.LEVEL.getPriority() : this.level.getPriority())) {
+
+        if(level == Level.OFF || level.getPriority() < ((this.level == null) ? SimpleLog.LEVEL.getPriority() : this.level.getPriority()))
             logToFiles(format, level);
-        }
         else
-        {
             print(format, level);
-        }
     }
 
     public void log(Throwable ex)
@@ -324,10 +322,9 @@ public class SimpleLog
         synchronized (listeners)
         {
             for (LogListener listener : listeners)
-            {
                 listener.onError(this, ex);
-            }
         }
+
         log(Level.FATAL, "Encountered an exception:");
         log(Level.FATAL, ExceptionUtils.getStackTrace(ex));
     }
@@ -337,7 +334,8 @@ public class SimpleLog
      *
      * @param msg the object, which should be logged
      */
-    public void trace(Object msg) {
+    public void trace(Object msg)
+    {
         log(Level.TRACE, msg);
     }
 
@@ -346,7 +344,8 @@ public class SimpleLog
      *
      * @param msg the object, which should be logged
      */
-    public void debug(Object msg) {
+    public void debug(Object msg)
+    {
         log(Level.DEBUG, msg);
     }
 
@@ -355,7 +354,8 @@ public class SimpleLog
      *
      * @param msg the object, which should be logged
      */
-    public void info(Object msg) {
+    public void info(Object msg)
+    {
         log(Level.INFO, msg);
     }
 
@@ -364,7 +364,8 @@ public class SimpleLog
      *
      * @param msg the object, which should be logged
      */
-    public void warn(Object msg) {
+    public void warn(Object msg)
+    {
         log(Level.WARNING, msg);
     }
 
@@ -373,7 +374,8 @@ public class SimpleLog
      *
      * @param msg the object, which should be logged
      */
-    public void fatal(Object msg) {
+    public void fatal(Object msg)
+    {
         log(Level.FATAL, msg);
     }
 
@@ -383,19 +385,19 @@ public class SimpleLog
      * @param msg   the message, that should be displayed
      * @param level the LOG level of the message
      */
-    private void print(String msg, Level level) {
-        if(ENABLE_GUI && !isConsolePresent()) {
-            if(level.isError()) {
+    private void print(String msg, Level level)
+    {
+        if(ENABLE_GUI && !isConsolePresent())
+        {
+            if(level.isError())
                 JOptionPane.showMessageDialog(null, msg, "An Error occurred!", JOptionPane.ERROR_MESSAGE);
-            } else {
+            else
                 JOptionPane.showMessageDialog(null, msg, level.getTag(), JOptionPane.INFORMATION_MESSAGE);
-            }
         } else {
-            if(level.isError()) {
+            if(level.isError())
                 System.err.println(msg);
-            } else {
+            else
                 System.out.println(msg);
-            }
         }
     }
 
@@ -404,7 +406,8 @@ public class SimpleLog
      *
      * @return boolean true, if console is present
      */
-    public static boolean isConsolePresent() {
+    public static boolean isConsolePresent()
+    {
         return System.console() != null;
     }
 
@@ -440,7 +443,8 @@ public class SimpleLog
     /**
      * Enum containing all the LOG-levels
      */
-    public enum Level {
+    public enum Level
+    {
         ALL("Finest", 0, false),
         TRACE("Trace", 1, false),
         DEBUG("Debug", 2, false),
@@ -453,7 +457,8 @@ public class SimpleLog
         private final int pri;
         private final boolean isError;
 
-        Level(String message, int priority, boolean isError) {
+        Level(String message, int priority, boolean isError)
+        {
             this.msg = message;
             this.pri = priority;
             this.isError = isError;
@@ -464,7 +469,8 @@ public class SimpleLog
          *
          * @return the logTag
          */
-        public String getTag() {
+        public String getTag()
+        {
             return msg;
         }
 
@@ -473,7 +479,8 @@ public class SimpleLog
          *
          * @return the level-priority
          */
-        public int getPriority() {
+        public int getPriority()
+        {
             return pri;
         }
 
@@ -482,7 +489,8 @@ public class SimpleLog
          *
          * @return boolean true, if this LOG-level is an error-level
          */
-        public boolean isError() {
+        public boolean isError()
+        {
             return isError;
         }
     }

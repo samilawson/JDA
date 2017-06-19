@@ -431,7 +431,8 @@ public class EntityBuilder
     }
 
     public User createFakeUser(JSONObject user, boolean modifyCache) { return createUser(user, true, modifyCache); }
-    public User createUser(JSONObject user)     { return createUser(user, false, true); }
+    public User createUser(JSONObject user) { return createUser(user, false, true); }
+
     private User createUser(JSONObject user, boolean fake, boolean modifyCache)
     {
         final long id = user.getLong("id");
@@ -681,6 +682,7 @@ public class EntityBuilder
     }
 
     public Message createMessage(JSONObject jsonObject) { return createMessage(jsonObject, false); }
+
     public Message createMessage(JSONObject jsonObject, boolean exceptionOnMissingUser)
     {
         final long channelId = jsonObject.getLong("channel_id");
@@ -697,6 +699,7 @@ public class EntityBuilder
 
         return createMessage(jsonObject, chan, exceptionOnMissingUser);
     }
+
     public Message createMessage(JSONObject jsonObject, MessageChannel chan, boolean exceptionOnMissingUser)
     {
         final long id = jsonObject.getLong("id");

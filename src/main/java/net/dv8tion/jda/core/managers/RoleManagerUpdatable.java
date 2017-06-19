@@ -195,7 +195,8 @@ public class RoleManagerUpdatable
      * for this manager instance by calling {@link net.dv8tion.jda.core.managers.fields.Field#reset() Field.reset()} sequentially
      * <br>This is automatically called by {@link #update()}
      */
-    public void reset() {
+    public void reset()
+    {
         name.reset();
         color.reset();
         hoisted.reset();

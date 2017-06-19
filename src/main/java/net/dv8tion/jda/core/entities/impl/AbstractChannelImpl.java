@@ -272,7 +272,8 @@ public abstract class AbstractChannelImpl<T extends AbstractChannelImpl<T>> impl
         return clazz.cast(this);
     }
 
-    protected void checkPermission(Permission permission) {checkPermission(permission, null);}
+    protected void checkPermission(Permission permission) { checkPermission(permission, null); }
+
     protected void checkPermission(Permission permission, String message)
     {
         if (!guild.getSelfMember().hasPermission(this, permission))

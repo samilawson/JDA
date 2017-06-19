@@ -91,27 +91,32 @@ public class MessageEmbedImpl implements MessageEmbed
     }
 
     @Override
-    public Footer getFooter() {
+    public Footer getFooter()
+    {
         return footer;
     }
 
     @Override
-    public ImageInfo getImage() {
+    public ImageInfo getImage()
+    {
         return image;
     }
 
     @Override
-    public List<Field> getFields() {
+    public List<Field> getFields()
+    {
         return Collections.unmodifiableList(fields);
     }
 
     @Override
-    public Color getColor() {
+    public Color getColor()
+    {
         return color;
     }
 
     @Override
-    public OffsetDateTime getTimestamp() {
+    public OffsetDateTime getTimestamp()
+    {
         return timestamp;
     }
 

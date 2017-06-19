@@ -266,7 +266,8 @@ public class MessageBuilder implements Appendable
      * 
      * @return weather the message contains content
      */
-    public boolean isEmpty() {
+    public boolean isEmpty()
+    {
         return builder.length() == 0 && embed == null;
     }
 
@@ -697,7 +698,8 @@ public class MessageBuilder implements Appendable
 
         LinkedList<Message> messages = new LinkedList<>();
 
-        if (builder.length() <= 2000) {
+        if (builder.length() <= 2000)
+        {
             messages.add(this.build());
             return messages;
         }

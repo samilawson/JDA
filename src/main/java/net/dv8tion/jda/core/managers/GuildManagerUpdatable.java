@@ -465,7 +465,7 @@ public class GuildManagerUpdatable
         this.icon = new GuildField<Icon>(this, null)
         {
             @Override
-            public void checkValue(Icon value) { }
+            public void checkValue(Icon value) {}
 
             @Override
             public Icon getOriginalValue()
@@ -483,7 +483,7 @@ public class GuildManagerUpdatable
         this.splash = new GuildField<Icon>(this, null)
         {
             @Override
-            public void checkValue(Icon value) { }
+            public void checkValue(Icon value) {}
 
             @Override
             public Icon getOriginalValue()

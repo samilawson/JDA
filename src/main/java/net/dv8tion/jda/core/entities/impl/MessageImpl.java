@@ -622,7 +622,8 @@ public class MessageImpl implements Message
         private final String format;
         private final int start;
 
-        public FormatToken(String format, int start) {
+        public FormatToken(String format, int start)
+        {
             this.format = format;
             this.start = start;
         }

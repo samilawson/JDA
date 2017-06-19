@@ -186,7 +186,8 @@ public class MemberImpl implements Member
     }
 
     @Override
-    public boolean isOwner() {
+    public boolean isOwner()
+    {
         return this.equals(guild.getOwner());
     }
 

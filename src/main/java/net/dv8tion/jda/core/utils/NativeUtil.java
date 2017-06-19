@@ -37,8 +37,7 @@ public class NativeUtil
     /**
      * Private constructor - this class will never be instanced
      */
-    private NativeUtil() {
-    }
+    private NativeUtil() {}
 
     /**
      * Loads library from current JAR archive
@@ -53,7 +52,8 @@ public class NativeUtil
      */
     public static void loadLibraryFromJar(String path) throws IOException {
 
-        if (!path.startsWith("/")) {
+        if (!path.startsWith("/"))
+        {
             throw new IllegalArgumentException("The path has to be absolute (start with '/').");
         }
 
@@ -64,14 +64,16 @@ public class NativeUtil
         // Split filename to prexif and suffix (extension)
         String prefix = "";
         String suffix = null;
-        if (filename != null) {
+        if (filename != null)
+        {
             parts = filename.split("\\.", 2);
             prefix = parts[0];
             suffix = (parts.length > 1) ? "."+parts[parts.length - 1] : null; // Thanks, davs! :-)
         }
 
         // Check if the filename is okay
-        if (filename == null || prefix.length() < 3) {
+        if (filename == null || prefix.length() < 3)
+        {
             throw new IllegalArgumentException("The filename has to be at least 3 characters long.");
         }
 
@@ -79,9 +81,8 @@ public class NativeUtil
         File temp = File.createTempFile(prefix, suffix);
         temp.deleteOnExit();
 
-        if (!temp.exists()) {
+        if (!temp.exists())
             throw new FileNotFoundException("File " + temp.getAbsolutePath() + " does not exist.");
-        }
 
         // Prepare buffer for data copying
         byte[] buffer = new byte[1024];
@@ -89,9 +90,8 @@ public class NativeUtil
 
         // Open and check input stream
         InputStream is = NativeUtil.class.getResourceAsStream(path);
-        if (is == null) {
+        if (is == null)
             throw new FileNotFoundException("File " + path + " was not found inside JAR.");
-        }
 
         // Open output stream and copy data between source file in JAR and the temporary file
         OutputStream os = new FileOutputStream(temp);

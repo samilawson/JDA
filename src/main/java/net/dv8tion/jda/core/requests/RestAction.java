@@ -621,9 +621,9 @@ public abstract class RestAction<T>
         return executor.schedule(() -> queue(success, failure), delay, unit);
     }
 
-    protected void finalizeData() { }
+    protected void finalizeData() {}
 
-    protected void finalizeRoute() { }
+    protected void finalizeRoute() {}
 
     protected CaseInsensitiveMap<String, String> finalizeHeaders()
     {
@@ -671,6 +671,6 @@ public abstract class RestAction<T>
         }
 
         @Override
-        protected void handleResponse(Response response, Request<T> request) { }
+        protected void handleResponse(Response response, Request<T> request) {}
     }
 }

@@ -50,7 +50,8 @@ public class GameImpl implements Game
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o)
+    {
         if (!(o instanceof GameImpl))
             return false;
 

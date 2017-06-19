@@ -594,7 +594,7 @@ public class JDAImpl implements JDA
             {
                 Runtime.getRuntime().removeShutdownHook(shutdownHook);
             }
-            catch (Exception ignored) { }
+            catch (Exception ignored) {}
         }
 
         if (free)

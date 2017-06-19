@@ -66,7 +66,8 @@ public class CombinedAudio
     {
         int byteIndex = 0;
         byte[] audio = new byte[audioData.length * 2];
-        for (short s : audioData) {
+        for (short s : audioData)
+        {
             if (volume != 1.0)
                 s = (short) (s * volume);
 

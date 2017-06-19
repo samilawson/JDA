@@ -103,6 +103,6 @@ public abstract class AuditableRestAction<T> extends RestAction<T>
         }
 
         @Override
-        protected void handleResponse(Response response, Request<T> request) { }
+        protected void handleResponse(Response response, Request<T> request) {}
     }
 }

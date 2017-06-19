@@ -473,12 +473,14 @@ public class WidgetUtil
         }
 
         @Override
-        public int hashCode() {
+        public int hashCode()
+        {
             return Long.hashCode(id);
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(Object obj)
+        {
             if (!(obj instanceof Widget))
                 return false;
             Widget oWidget = (Widget) obj;
@@ -699,12 +701,14 @@ public class WidgetUtil
             }
 
             @Override
-            public int hashCode() {
+            public int hashCode()
+            {
                 return (widget.getId() + ' ' + id).hashCode();
             }
 
             @Override
-            public boolean equals(Object obj) {
+            public boolean equals(Object obj)
+            {
                 if (!(obj instanceof Member))
                     return false;
                 Member oMember = (Member) obj;
@@ -788,12 +792,14 @@ public class WidgetUtil
             }
 
             @Override
-            public int hashCode() {
+            public int hashCode()
+            {
                 return Long.hashCode(id);
             }
 
             @Override
-            public boolean equals(Object obj) {
+            public boolean equals(Object obj)
+            {
                 if (!(obj instanceof VoiceChannel))
                     return false;
                 VoiceChannel oVChannel = (VoiceChannel) obj;
@@ -937,12 +943,14 @@ public class WidgetUtil
             }
 
             @Override
-            public int hashCode() {
+            public int hashCode()
+            {
                 return member.hashCode();
             }
 
             @Override
-            public boolean equals(Object obj) {
+            public boolean equals(Object obj)
+            {
                 if (!(obj instanceof VoiceState))
                     return false;
                 VoiceState oState = (VoiceState) obj;
@@ -950,7 +958,8 @@ public class WidgetUtil
             }
 
             @Override
-            public String toString() {
+            public String toString()
+            {
                 return "VS:" + widget.getName() + ':' + member.getEffectiveName();
             }
         }
