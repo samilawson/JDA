@@ -27,7 +27,6 @@ import net.dv8tion.jda.core.entities.impl.TextChannelImpl;
 import net.dv8tion.jda.core.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageDeleteEvent;
-import net.dv8tion.jda.core.requests.GuildLock;
 import org.json.JSONObject;
 
 public class MessageDeleteHandler extends SocketHandler
@@ -72,7 +71,7 @@ public class MessageDeleteHandler extends SocketHandler
                 return tChan.getGuild().getIdLong();
             }
             if (tChan.hasLatestMessage() && messageId == channel.getLatestMessageIdLong())
-                tChan.setLastMessageId(-1); // Reset latest message id as it was deleted.
+                tChan.setLastMessageId(0); // Reset latest message id as it was deleted.
             api.getEventManager().handle(
                     new GuildMessageDeleteEvent(
                             api, responseNumber,
@@ -82,7 +81,7 @@ public class MessageDeleteHandler extends SocketHandler
         {
             PrivateChannelImpl pChan = (PrivateChannelImpl) channel;
             if (channel.hasLatestMessage() && messageId == channel.getLatestMessageIdLong())
-                pChan.setLastMessageId(-1); // Reset latest message id as it was deleted.
+                pChan.setLastMessageId(0); // Reset latest message id as it was deleted.
             api.getEventManager().handle(
                     new PrivateMessageDeleteEvent(
                             api, responseNumber,
@@ -92,7 +91,7 @@ public class MessageDeleteHandler extends SocketHandler
         {
             GroupImpl group = (GroupImpl) channel;
             if (channel.hasLatestMessage() && messageId == channel.getLatestMessageIdLong())
-                group.setLastMessageId(-1); // Reset latest message id as it was deleted.
+                group.setLastMessageId(0); // Reset latest message id as it was deleted.
             api.getEventManager().handle(
                     new GroupMessageDeleteEvent(
                             api, responseNumber,

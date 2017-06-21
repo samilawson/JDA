@@ -76,7 +76,7 @@ public interface MessageChannel extends ISnowflake, Formattable
      * <p>This value is updated on each {@link net.dv8tion.jda.core.events.message.MessageReceivedEvent MessageReceivedEvent}
      * and <u><b>will be reset to {@code null} if the message associated with this ID gets deleted</b></u>
      *
-     * @throws java.lang.IllegalStateException
+     * @throws java.util.NoSuchElementException
      *         If no message id is available
      *
      * @return The most recent message's id
@@ -94,7 +94,7 @@ public interface MessageChannel extends ISnowflake, Formattable
      * <p>This value is updated on each {@link net.dv8tion.jda.core.events.message.MessageReceivedEvent MessageReceivedEvent}
      * and <u><b>will be reset to {@code null} if the message associated with this ID gets deleted</b></u>
      *
-     * @throws java.lang.IllegalStateException
+     * @throws java.util.NoSuchElementException
      *         If no message id is available
      *
      * @return The most recent message's id
@@ -107,7 +107,8 @@ public interface MessageChannel extends ISnowflake, Formattable
      *
      * <p>This does not directly mean that {@link #getHistory()} will be unable to retrieve past messages,
      * it merely means that the latest message is untracked by our internal cache meaning that
-     * if this returns {@code false} the {@link #getLatestMessageId()} method will throw an {@link java.lang.IllegalStateException IllegalStateException}
+     * if this returns {@code false} the {@link #getLatestMessageId()}
+     * method will throw an {@link java.util.NoSuchElementException NoSuchElementException}
      *
      * @return True, if a latest message id is available for retrieval by {@link #getLatestMessageId()}
      *

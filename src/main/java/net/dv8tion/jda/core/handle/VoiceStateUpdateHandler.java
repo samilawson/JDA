@@ -33,7 +33,6 @@ import net.dv8tion.jda.core.entities.impl.MemberImpl;
 import net.dv8tion.jda.core.entities.impl.VoiceChannelImpl;
 import net.dv8tion.jda.core.events.guild.voice.*;
 import net.dv8tion.jda.core.managers.impl.AudioManagerImpl;
-import net.dv8tion.jda.core.requests.GuildLock;
 import net.dv8tion.jda.core.requests.WebSocketClient;
 import org.json.JSONObject;
 
@@ -187,8 +186,8 @@ public class VoiceStateUpdateHandler extends SocketHandler
     private void handleCallVoiceState(JSONObject content)
     {
         final long userId = content.getLong("user_id");
-        final Long channelId = !content.isNull("channel_id") ? content.getLong("channel_id") : null;
-        String sessionId = !content.isNull("session_id") ? content.getString("session_id") : null;
+        final Long channelId = content.isNull("channel_id") ? null : content.getLong("channel_id");
+        String sessionId = content.isNull("session_id") ? null : content.getString("session_id");
         boolean selfMuted = content.getBoolean("self_mute");
         boolean selfDeafened = content.getBoolean("self_deaf");
 
