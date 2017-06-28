@@ -127,6 +127,13 @@ public class ErrorResponseException extends RuntimeException
                 meaning = response.responseText;
             }
         }
+        else
+        {
+            // This means the error response is not in form of a JSONObject
+            //Possibly xml?
+            code = response.code;
+            meaning = response.responseText;
+        }
 
         return new ErrorResponseException(errorResponse, response, code, meaning);
     }
