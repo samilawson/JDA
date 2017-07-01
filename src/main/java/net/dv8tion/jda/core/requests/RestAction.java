@@ -283,11 +283,11 @@ public abstract class RestAction<T>
     }
 
     /**
-     * Submits a Request for execution and provides an {@link net.dv8tion.jda.core.requests.restaction.RequestFuture RequestFuture} 
+     * Submits a Request for execution and provides an {@link net.dv8tion.jda.core.requests.RequestFuture RequestFuture}
      * representing its completion task.
      * <br>Cancelling the returned Future will result in the cancellation of the Request!
      *
-     * @return Never-null {@link net.dv8tion.jda.core.requests.restaction.RequestFuture RequestFuture} representing the completion promise
+     * @return Never-null {@link net.dv8tion.jda.core.requests.RequestFuture RequestFuture} representing the completion promise
      */
     public RequestFuture<T> submit()
     {
@@ -295,14 +295,14 @@ public abstract class RestAction<T>
     }
 
     /**
-     * Submits a Request for execution and provides an {@link net.dv8tion.jda.core.requests.restaction.RequestFuture RequestFuture} 
+     * Submits a Request for execution and provides an {@link net.dv8tion.jda.core.requests.RequestFuture RequestFuture}
      * representing its completion task.
      * <br>Cancelling the returned Future will result in the cancellation of the Request!
      *
      * @param  shouldQueue
      *         Whether the Request should automatically handle rate limitations. (default true)
      *
-     * @return Never-null {@link net.dv8tion.jda.core.requests.restaction.RequestFuture RequestFuture} task representing the completion promise
+     * @return Never-null {@link net.dv8tion.jda.core.requests.RequestFuture RequestFuture} task representing the completion promise
      */
     public RequestFuture<T> submit(boolean shouldQueue)
     {
