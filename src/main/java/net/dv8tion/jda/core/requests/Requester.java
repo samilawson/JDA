@@ -99,7 +99,7 @@ public class Requester
      *         the request can be made again. This could either be for the Per-Route ratelimit or the Global ratelimit.
      *         <br>Check if globalCooldown is {@code null} to determine if it was Per-Route or Global.
      */
-    public <T> Response execute(Request<T> apiRequest)
+    public Response execute(Request<?> apiRequest)
     {
         Route.CompiledRoute route = apiRequest.getRoute();
         Long retryAfter = rateLimiter.getRateLimit(route);

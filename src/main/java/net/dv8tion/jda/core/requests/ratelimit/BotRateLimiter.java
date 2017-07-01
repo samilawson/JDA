@@ -304,14 +304,14 @@ public class BotRateLimiter extends RateLimiter
                         {
                             request = it.next();
                             Response response = requester.execute(request);
-                            if (response != null)
-                                request.handleResponse(response);
-                            if (response.retryAfter > 0)
+                            if (response != null && response.retryAfter > 0)
                             {
                                 break;
                             }
                             else
                             {
+                                if (response != null)
+                                    request.handleResponse(response);
                                 it.remove();
                             }
                         }
