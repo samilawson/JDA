@@ -21,11 +21,12 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class Response
+public class Response implements Closeable
 {
     public static final int ERROR_CODE = -1;
     public static final String ERROR_MESSAGE = "ERROR";
@@ -147,5 +148,12 @@ public class Response
         return this.exception == null
                 ? "HTTPResponse[" + this.code + (this.object == null ? "" : ", " + this.object.toString()) + ']'
                 : "HTTPException[" + this.exception.getMessage() + ']';
+    }
+
+    @Override
+    public void close()
+    {
+        if (rawResponse != null)
+            rawResponse.close();
     }
 }

@@ -184,6 +184,8 @@ public class Requester
                 apiRequest.handleResponse(new Response(response, -1, rays));
             else if (handleOnRatelimit)
                 apiRequest.handleResponse(new Response(response, retryAfter, rays));
+            else
+                response.close();
 
             return retryAfter;
         }
