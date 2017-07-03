@@ -127,6 +127,12 @@ public class ErrorResponseException extends RuntimeException
                 meaning = response.message;
             }
         }
+        else
+        {
+            // error response body is not JSON
+            code = response.code;
+            meaning = response.message;
+        }
 
         return new ErrorResponseException(errorResponse, response, code, meaning);
     }
