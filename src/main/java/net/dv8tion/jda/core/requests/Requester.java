@@ -160,8 +160,9 @@ public class Requester
                 attempt++;
                 LOG.debug(String.format("Requesting %s -> %s returned status %d... retrying (attempt %d)",
                         apiRequest.getRoute().getMethod().toString(),
-                        url,
-                        response.code(), attempt));
+                        url, response.code(), attempt));
+
+                response.close();
                 try
                 {
                     Thread.sleep(50 * attempt);
