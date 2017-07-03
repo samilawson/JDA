@@ -183,7 +183,6 @@ public abstract class RestAction<T>
     public RestAction(JDA api, Route.CompiledRoute route, RequestBody data)
     {
         Checks.notNull(api, "api");
-        Checks.notNull(route, "route");
 
         this.api = (JDAImpl) api;
         this.route = route;
@@ -275,11 +274,15 @@ public abstract class RestAction<T>
      */
     public void queue(Consumer<T> success, Consumer<Throwable> failure)
     {
+        Route.CompiledRoute route = finalizeRoute();
+        RequestBody data = finalizeData();
+        CaseInsensitiveMap<String, String> headers = finalizeHeaders();
+        Checks.notNull(route, "Route");
         if (success == null)
             success = DEFAULT_SUCCESS;
         if (failure == null)
             failure = DEFAULT_FAILURE;
-        api.getRequester().request(new Request<>(this, success, failure, true, finalizeData(), rawData, finalizeRoute(), finalizeHeaders()));
+        api.getRequester().request(new Request<>(this, success, failure, true, data, rawData, route, headers));
     }
 
     /**
@@ -306,7 +309,11 @@ public abstract class RestAction<T>
      */
     public RequestFuture<T> submit(boolean shouldQueue)
     {
-        return new RestFuture<>(this, shouldQueue, finalizeData(), rawData, finalizeRoute(), finalizeHeaders());
+        Route.CompiledRoute route = finalizeRoute();
+        RequestBody data = finalizeData();
+        CaseInsensitiveMap<String, String> headers = finalizeHeaders();
+        Checks.notNull(route, "Route");
+        return new RestFuture<>(this, shouldQueue, data, rawData, route, headers);
     }
 
     /**
